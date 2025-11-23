@@ -1,6 +1,6 @@
 // Presentation Service: Integration of Clinical Comparison with Facial Symmetry Application
 // Provides left vs right movement comparison for clinical assessment
-import { ClinicalComparisonService } from '../../../domain/services/ClinicalComparisonService.js';
+import { ClinicalComparisonService } from '/static/js/src/domain/services/ClinicalComparisonService.js';
 export class ClinicalComparisonIntegrationService {
     constructor() {
         this.clinicalComparisonService = new ClinicalComparisonService();

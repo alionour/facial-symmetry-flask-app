@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Analysis Results') }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='results.css') }}">
+{% endblock %}
+
+{% block content %}
+<div id="resultsContainer" class="results-container">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+                            fill="currentColor" />
+                    </svg>
+                </div>
+                <span class="brand-text">{{ _('Analysis Results') }}</span>
+            </div>
+            <div class="nav-actions">
+                <form method="POST" action="{{ url_for('export_pdf') }}" style="display: inline;">
+                    {{ csrf_token() }}
+                    <button type="submit" class="nav-btn primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+                                fill="currentColor" />
+                        </svg>
+                        {{ _('Export PDF') }}
+                    </button>
+                </form>
+                <a href="{{ url_for('new_assessment') }}" class="nav-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="currentColor" />
+                    </svg>
+                    {{ _('New Assessment') }}
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Results Content -->
+    <div class="results-content">
+        <!-- Patient Information Card -->
+        <div class="results-card">
+            <h2 class="card-title">{{ _('Patient Information') }}</h2>
+            <div class="patient-info-grid">
+                <div class="info-item">
+                    <span class="info-label">{{ _('Patient ID') }}:</span>
+                    <span class="info-value">{{ patient_info.patient_id }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">{{ _('Patient Name') }}:</span>
+                    <span class="info-value">{{ patient_info.patient_name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">{{ _('Age') }}:</span>
+                    <span class="info-value">{{ patient_info.patient_age }} {{ _('years') }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">{{ _('Exam Date') }}:</span>
+                    <span class="info-value">{{ patient_info.exam_date }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">{{ _('Exam Time') }}:</span>
+                    <span class="info-value">{{ patient_info.exam_time }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Score Card -->
+        <div class="results-card score-card">
+            <h2 class="card-title">{{ _('Overall Symmetry Score') }}</h2>
+            <div class="overall-score">
+                <div class="score-circle">
+                    <span class="score-value">{{ "%.1f"|format(overall_score) }}</span>
+                    <span class="score-max">/100</span>
+                </div>
+                <p class="score-description">
+                    {% if overall_score >= 80 %}
+                    {{ _('Excellent facial symmetry') }}
+                    {% elif overall_score >= 60 %}
+                    {{ _('Good facial symmetry') }}
+                    {% elif overall_score >= 40 %}
+                    {{ _('Moderate asymmetry detected') }}
+                    {% else %}
+                    {{ _('Significant asymmetry detected') }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Expression Analysis Cards -->
+        <div class="results-card">
+            <h2 class="card-title">{{ _('Expression Analysis') }}</h2>
+            <div class="expressions-grid">
+                {% for action, result in analysis_results.items() %}
+                {% if result %}
+                <div class="expression-card">
+                    <h3 class="expression-title">
+                        {% if action == 'NEUTRAL' %}{{ _('Neutral Expression') }}
+                        {% elif action == 'EYEBROW_RAISE' %}{{ _('Eyebrow Raise') }}
+                        {% elif action == 'EYE_CLOSE' %}{{ _('Eye Closure') }}
+                        {% elif action == 'SMILE' %}{{ _('Smile') }}
+                        {% else %}{{ action }}
+                        {% endif %}
+                    </h3>
+
+                    {% if result.image_data %}
+                    <div class="expression-image">
+                        <img src="{{ result.image_data }}" alt="{{ action }}">
+                    </div>
+                    {% else %}
+                    <div class="expression-image no-image">
+                        <p>{{ _('No Image Available') }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="expression-metrics">
+                        <div class="metric-item">
+                            <span class="metric-label">{{ _('Symmetry Score') }}:</span>
+                            <span class="metric-value">{{ "%.1f"|format(result.symmetry_score) }}/100</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">{{ _('Landmarks Detected') }}:</span>
+                            <span class="metric-value">{{ result.landmarks|length if result.landmarks else 0 }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Clinical Notes (Optional) -->
+        <div class="results-card">
+            <h2 class="card-title">{{ _('Clinical Notes') }}</h2>
+            <div class="clinical-notes">
+                <p>{{ _('This automated analysis provides objective measurements of facial symmetry. Clinical
+                    interpretation should be performed by a qualified healthcare professional.') }}</p>
+                <p>{{ _('Symmetry scores are calculated based on bilateral landmark positions and may be affected by
+                    head position, lighting, and image quality.') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Minimal JavaScript for results page (optional enhancements)
+    console.log('Results page loaded');
+</script>
+{% endblock %}

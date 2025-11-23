@@ -1,4 +1,6 @@
 from fpdf import FPDF
+import csv
+from io import StringIO
 
 class PDF(FPDF):
     def header(self):
@@ -40,9 +42,6 @@ def generate_pdf(analysis_data):
     pdf.cell(0, 10, 'Symmetry Analysis Results', 0, 1)
     pdf.set_font('Arial', '', 12)
 
-    # This is a placeholder for the actual analysis results.
-    # In a real implementation, you would iterate through the analysis data
-    # and format it nicely in the PDF.
     results = analysis_data.get('analysisResult', {})
     for action, metrics in results.items():
         pdf.set_font('Arial', 'B', 12)
@@ -56,5 +55,49 @@ def generate_pdf(analysis_data):
                 pdf.cell(0, 10, f"  {metric.replace('_', ' ').title()}: {value:.2f}", 0, 1)
         pdf.ln(5)
 
-    # Return the PDF as a byte string
     return pdf.output()
+
+def generate_csv(analysis_data):
+    """
+    Generates a CSV report from analysis data.
+    """
+    output = StringIO()
+    writer = csv.writer(output)
+
+    results = analysis_data.get('analysisResult', [])
+    if not results:
+        return ""
+
+    # Headers
+    headers = ['actionName', 'metricName', 'value', 'score', 'label']
+    writer.writerow(headers)
+
+    # Rows
+    for result in results:
+        writer.writerow([
+            result.get('actionName', ''),
+            result.get('metricName', ''),
+            result.get('value', ''),
+            result.get('score', ''),
+            result.get('label', '')
+        ])
+
+    return output.getvalue()
+
+def generate_markdown(analysis_data):
+    """
+    Generates a Markdown report from analysis data.
+    """
+    results = analysis_data.get('analysisResult', [])
+    if not results:
+        return ""
+
+    md = "# Facial Symmetry Analysis Results\n\n"
+    md += "| Action | Metric | Value | Score | Label |\n"
+    md += "|--------|--------|-------|-------|-------|\n"
+
+    for result in results:
+        md += f"| {result.get('actionName', '')} | {result.get('metricName', '')} | {result.get('value', ''):.4f} | {result.get('score', '')} | {result.get('label', '')} |\n"
+
+    md += '\n**Score Legend:** 0=Normal, 1=Mild, 2=Moderate, 3=Moderately Severe, 4=Severe\n'
+    return md

@@ -1,6 +1,6 @@
 // Domain Service: Clinical Comparison of Left and Right Facial Movements
 // Provides detailed asymmetry analysis for Bell's palsy and facial paralysis assessment
-import { ClinicalIntegrationService } from '../../presentation/services/clinical_services/ClinicalIntegrationService.js';
+import { ClinicalIntegrationService } from '/static/js/src/presentation/services/clinical_services/ClinicalIntegrationService.js';
 export class ClinicalComparisonService {
     constructor() {
         this.clinicalIntegrationService = new ClinicalIntegrationService();

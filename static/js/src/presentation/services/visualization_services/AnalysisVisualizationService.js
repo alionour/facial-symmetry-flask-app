@@ -1,4 +1,4 @@
-import { DistanceEstimationService } from '../analysis_services/DistanceEstimationService.js';
+import { DistanceEstimationService } from '/static/js/src/presentation/services/analysis_services/DistanceEstimationService.js';
 export class AnalysisVisualizationService {
     constructor(canvasId) {
         this.currentLandmarks = [];

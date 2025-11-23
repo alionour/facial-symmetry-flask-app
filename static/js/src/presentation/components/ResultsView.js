@@ -1,7 +1,7 @@
 // Import removed - export functionality now implemented directly in ResultsView
 // ResultsView.ts
 // Handles rendering of the results page and exporting results in various formats
-import { VersionManager } from '../../core/version/VersionManager.js';
+import { VersionManager } from '/static/js/src/core/version/VersionManager.js';
 export class ResultsView {
     setResults(results) {
         console.log('ResultsView.setResults - Received results:', results);

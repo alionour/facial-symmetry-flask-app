@@ -1,4 +1,4 @@
-import { ApiClient } from '../api/ApiClient.js';
+import { ApiClient } from '/static/js/src/infrastructure/api/ApiClient.js';
 export class CameraRepository {
     constructor() {
         this.currentFacingMode = 'user';

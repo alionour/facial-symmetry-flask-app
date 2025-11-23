@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Home - Facial Symmetry Analysis') }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+{% endblock %}
+
+{% block content %}
+<div id="homeView" class="home-container">
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H19V9Z"
+                            fill="currentColor" />
+                    </svg>
+                </div>
+                <span class="brand-text">{{ _('Facial Symmetry Analysis') }}</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-text">{{ _('Clinical Grade Analysis') }}</span>
+                </div>
+                <h1 class="hero-title">
+                    {{ _('Advanced Facial Symmetry') }}
+                    <span class="title-highlight">{{ _('Assessment Platform') }}</span>
+                </h1>
+                <p class="hero-description">
+                    {{ _('Professional-grade facial symmetry analysis for Bell\'s palsy assessment using cutting-edge
+                    computer vision technology and validated clinical grading standards.') }}
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">468+</div>
+                        <div class="stat-label">{{ _('Facial Landmarks') }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">90%</div>
+                        <div class="stat-label">{{ _('Accuracy Rate') }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ _('1min') }}</div>
+                        <div class="stat-label">{{ _('Assessment Time') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="visual-card">
+                    <div class="visual-header">
+                        <h3 style="font-size:1rem;">{{ _('Start Assessment') }}</h3>
+                        <div class="status-indicator">
+                            <span class="status-dot"></span>
+                            {{ _('Ready') }}
+                        </div>
+                    </div>
+
+                    <!-- Patient Form -->
+                    <form method="POST" action="{{ url_for('start_assessment') }}" id="patientForm"
+                        class="assessment-form">
+                        {{ form.hidden_tag() }}
+
+                        <!-- Patient Information -->
+                        <div class="form-section">
+                            <h4 class="section-title" style="font-size:0.95rem;">{{ _('Patient Information') }}</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    {{ form.patient_id.label(class="form-label") }}
+                                    {{ form.patient_id(class="form-input", id="pid") }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form.patient_age.label(class="form-label") }}
+                                    {{ form.patient_age(class="form-input", id="page") }}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                {{ form.patient_name.label(class="form-label") }}
+                                {{ form.patient_name(class="form-input", id="pname") }}
+                            </div>
+                        </div>
+
+                        <!-- Hidden assessment mode field (default to live) -->
+                        {{ form.assessment_mode(value='live', style='display:none;') }}
+
+                        <!-- Checklist -->
+                        <div class="form-section">
+                            <h4 class="section-title" style="font-size:0.95rem;">{{ _('Before you begin') }}</h4>
+                            <div class="checklist">
+                                <div class="checklist-item">
+                                    <div class="check-icon">✓</div>
+                                    <span>{{ _('Good lighting conditions') }}</span>
+                                </div>
+                                <div class="checklist-item">
+                                    <div class="check-icon">✓</div>
+                                    <span>{{ _('Camera at eye level') }}</span>
+                                </div>
+                                <div class="checklist-item">
+                                    <div class="check-icon">✓</div>
+                                    <span>{{ _('Remove glasses/masks') }}</span>
+                                </div>
+                                <div class="checklist-item">
+                                    <div class="check-icon">✓</div>
+                                    <span>{{ _('Quiet environment') }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-actions">
+                            {{ form.submit(class="start-assessment-btn") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="features-container">
+            <div class="section-header">
+                <h2 class="section-title">{{ _('Clinical-Grade Technology') }}</h2>
+                <p class="section-description">
+                    {{ _('Powered by advanced AI and validated against clinical standards for reliable Bell\'s palsy
+                    assessment.') }}
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H19V9Z"
+                                fill="currentColor" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">{{ _('Precise Landmark Detection') }}</h3>
+                    <p class="feature-description">
+                        {{ _('468-point facial landmark detection using MediaPipe technology for comprehensive facial
+                        analysis.') }}
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+                                fill="currentColor" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">{{ _('Clinical Documentation') }}</h3>
+                    <p class="feature-description">
+                        {{ _('Professional PDF reports with detailed measurements, analysis results, and clinical
+                        recommendations.') }}
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M17,19H7V5H17M17,1H7C5.89,1 5,1.89 5,3V21C5,22.11 5.89,23 7,23H17C18.11,23 19,22.11 19,21V3C19,1.89 18.11,1 17,1Z"
+                                fill="currentColor" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">{{ _('Mobile Compatible') }}</h3>
+                    <p class="feature-description">
+                        {{ _('Responsive design works seamlessly across desktop, tablet, and mobile devices for flexible
+                        usage.') }}
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.6 14.8,10V11.5C14.8,12.6 13.9,13.5 12.8,13.5H11.2C10.1,13.5 9.2,12.6 9.2,11.5V10C9.2,8.6 10.6,7 12,7M12,8.2C11.2,8.2 10.5,8.7 10.5,9.5V10.8C10.5,11.1 10.8,11.3 11.1,11.3H12.9C13.2,11.3 13.5,11.1 13.5,10.8V9.5C13.5,8.7 12.8,8.2 12,8.2Z"
+                                fill="currentColor" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">{{ _('Privacy & Security') }}</h3>
+                    <p class="feature-description">
+                        {{ _('All processing happens locally in your browser. No patient data is transmitted or stored
+                        externally.') }}
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"
+                                fill="currentColor" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">{{ _('Real-time Analysis') }}</h3>
+                    <p class="feature-description">
+                        {{ _('Instant feedback and live visualization during assessment with guided instructions for
+                        optimal results.') }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="brand-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H19V9Z"
+                                fill="currentColor" />
+                        </svg>
+                    </div>
+                    <span class="brand-text">{{ _('FacialSymmetry') }}</span>
+                </div>
+                <div class="footer-info">
+                    <p class="version-text">{{ _('Version 1.0.0 • Released May 2025') }}</p>
+                    <p class="copyright">{{ _('© 2025 Facial Symmetry Analysis Platform') }}</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script>
+    // Auto-fill test data if the test_env flag is set
+    if (sessionStorage.getItem('test_env') === 'true') {
+        const pidInput = document.getElementById('pid');
+        const pnameInput = document.getElementById('pname');
+        const pageInput = document.getElementById('page');
+
+        if (pidInput) pidInput.value = 'P001';
+        if (pnameInput) pnameInput.value = 'Test Patient';
+        if (pageInput) pageInput.value = '42';
+
+        console.log('🧪 Test data populated for test environment');
+    }
+</script>
+{% endblock %}

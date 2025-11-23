@@ -1,8 +1,8 @@
 // Presentation: Main Application
-import { DependencyContainer } from '../../infrastructure/di/DependencyContainer.js';
-import { LiveVideoAnalysisController } from '../controllers/LiveVideoAnalysisController.js';
-import { ResultsController } from '../controllers/ResultsController.js';
-import { PatientForm } from '../components/PatientForm.js';
+import { DependencyContainer } from '/static/js/src/infrastructure/di/DependencyContainer.js';
+import { LiveVideoAnalysisController } from '/static/js/src/presentation/controllers/LiveVideoAnalysisController.js';
+import { ResultsController } from '/static/js/src/presentation/controllers/ResultsController.js';
+import { PatientForm } from '/static/js/src/presentation/components/PatientForm.js';
 export class FacialSymmetryApp {
     constructor() {
         this.pendingExamPatientData = null;

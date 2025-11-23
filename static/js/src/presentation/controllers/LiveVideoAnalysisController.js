@@ -1,6 +1,6 @@
-import { InstructionView } from '../components/InstructionView.js';
+import { InstructionView } from '/static/js/src/presentation/components/InstructionView.js';
 // Visualization services for facial landmark rendering
-import { FaceVisualizationService } from '../services/visualization_services/FaceVisualizationService.js';
+import { FaceVisualizationService } from '/static/js/src/presentation/services/visualization_services/FaceVisualizationService.js';
 // Clinical analysis and integration services
 import { ClinicalComparisonIntegrationService } from '../services/clinical_services/ClinicalComparisonIntegrationService.js';
 import { ClinicalIntegrationService } from '../services/clinical_services/ClinicalIntegrationService.js';

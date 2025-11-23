@@ -1,5 +1,5 @@
 // Domain Service: Metric Calculation
-import { FacialMetrics } from '../value-objects/FacialMetrics.js';
+import { FacialMetrics } from '/static/js/src/domain/value-objects/FacialMetrics.js';
 export class MetricCalculationService {
     calculateMetrics(landmarks) {
         const coords = this.extractCoordinates(landmarks);

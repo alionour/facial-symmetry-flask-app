@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Live Video Analysis') }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='live-video-analysis.css') }}">
+{% endblock %}
+
+{% block content %}
+<div id="liveVideoAnalysisView" class="live-video-analysis-container">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" />
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="brand-text">{{ _('Live Video Analysis') }}</span>
+            </div>
+            <div class="nav-actions">
+                <a href="{{ url_for('index') }}" class="nav-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"
+                            fill="currentColor" />
+                    </svg>
+                    {{ _('Back to Home') }}
+                </a>
+                <button id="finishBtn" class="nav-btn success" style="display: none;"
+                    onclick="window.location.href='{{ url_for('results') }}'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                    </svg>
+                    {{ _('Finish Analysis') }}
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Action Title Section -->
+    <div class="action-title-section">
+        <h2 id="actionTitle" class="action-title">{{ _('Ready to Begin Assessment') }}</h2>
+        <p id="actionInstruction" class="action-instruction"></p>
+    </div>
+
+    <!-- Camera Views Section -->
+    <div class="camera-section">
+        <div class="camera-views">
+            <!-- Live Camera Feed -->
+            <div class="camera-view live">
+                <div class="camera-header live">{{ _('Live Camera') }}</div>
+                <div class="camera-content">
+                    <video id="video" autoplay muted playsinline style="display: block; background: #333;"></video>
+                </div>
+            </div>
+
+            <!-- Analysis View -->
+            <div class="camera-view analysis">
+                <div class="camera-header analysis">{{ _('Analysis View') }}</div>
+                <div class="camera-content">
+                    <canvas id="analysisCanvas" style="display: block; background: #222;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Capture Controls -->
+    <div class="capture-controls" style="text-align: center; margin: 20px;">
+        <button id="captureBtn" class="nav-btn primary" onclick="captureCurrentAction()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z"
+                    fill="currentColor" />
+            </svg>
+            {{ _('Capture') }}
+        </button>
+        <button id="nextActionBtn" class="nav-btn" onclick="nextAction()" style="display: none;">
+            {{ _('Next Action') }}
+        </button>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-section" style="max-width: 600px; margin: 20px auto;">
+        <div class="progress-items">
+            <div class="progress-item" data-action="NEUTRAL">
+                <div class="progress-icon">1</div>
+                <span>{{ _('Neutral') }}</span>
+            </div>
+            <div class="progress-item" data-action="EYEBROW_RAISE">
+                <div class="progress-icon">2</div>
+                <span>{{ _('Eyebrow Raise') }}</span>
+            </div>
+            <div class="progress-item" data-action="EYE_CLOSE">
+                <div class="progress-icon">3</div>
+                <span>{{ _('Eye Close') }}</span>
+            </div>
+            <div class="progress-item" data-action="SMILE">
+                <div class="progress-icon">4</div>
+                <span>{{ _('Smile') }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+<script src="{{ url_for('static', filename='js/canvas-drawing.js') }}"></script>
+<script>
+    // Live Video Analysis Controller
+    const ACTIONS = ['NEUTRAL', 'EYEBROW_RAISE', 'EYE_CLOSE', 'SMILE'];
+    const INSTRUCTIONS = {
+        'NEUTRAL': '{{ _("Please relax your face and maintain a neutral expression") }}',
+        'EYEBROW_RAISE': '{{ _("Please raise your eyebrows as high as possible.") }}',
+        'EYE_CLOSE': '{{ _("Please close your eyes tightly.") }}',
+        'SMILE': '{{ _("Please smile broadly showing your teeth.") }}'
+    };
+
+    let currentActionIndex = 0;
+    let cameraManager = null;
+    let canvasDrawer = null;
+    let capturedActions = new Set();
+
+    // Initialize camera and canvas
+    async function initializeApp() {
+        cameraManager = new CameraManager();
+        canvasDrawer = new CanvasDrawer('analysisCanvas');
+
+        const success = await cameraManager.initialize('video');
+        if (success) {
+            updateCurrentAction();
+        }
+    }
+
+    function updateCurrentAction() {
+        const action = ACTIONS[currentActionIndex];
+        const instruction = INSTRUCTIONS[action];
+
+        document.getElementById('actionTitle').textContent = action.replace('_', ' ');
+        document.getElementById('actionInstruction').textContent = instruction;
+
+        // Update progress indicators
+        document.querySelectorAll('.progress-item').forEach((item, index) => {
+            if (index < currentActionIndex) {
+                item.classList.add('completed');
+            } else if (index === currentActionIndex) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('completed', 'active');
+            }
+        });
+    }
+
+    async function captureCurrentAction() {
+        const action = ACTIONS[currentActionIndex];
+        const frameData = cameraManager.captureFrame();
+
+        if (!frameData) {
+            alert('{{ _("Failed to capture frame") }}');
+            return;
+        }
+
+        // Show loading state
+        document.getElementById('captureBtn').disabled = true;
+        document.getElementById('captureBtn').textContent = '{{ _("Processing...") }}';
+
+        // Get CSRF token
+        const csrfToken = '{{ csrf_token() }}';
+
+        // Submit frame to server
+        const result = await cameraManager.submitFrame(action, frameData, csrfToken);
+
+        if (result.success) {
+            capturedActions.add(action);
+
+            // Draw landmarks on canvas
+            if (result.landmarks) {
+                canvasDrawer.drawImage(frameData);
+                setTimeout(() => {
+                    canvasDrawer.drawLandmarks(result.landmarks, cameraManager.video.videoWidth, cameraManager.video.videoHeight);
+                    canvasDrawer.drawSymmetryLine(cameraManager.video.videoWidth, cameraManager.video.videoHeight);
+                }, 100);
+            }
+
+            // Show next action button
+            document.getElementById('captureBtn').style.display = 'none';
+            document.getElementById('nextActionBtn').style.display = 'inline-flex';
+        } else {
+            alert(result.error || '{{ _("Error processing frame") }}');
+            document.getElementById('captureBtn').disabled = false;
+            document.getElementById('captureBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z" fill="currentColor"/></svg> {{ _("Capture") }}';
+        }
+    }
+
+    function nextAction() {
+        currentActionIndex++;
+
+        if (currentActionIndex < ACTIONS.length) {
+            // Move to next action
+            updateCurrentAction();
+            document.getElementById('captureBtn').style.display = 'inline-flex';
+            document.getElementById('captureBtn').disabled = false;
+            document.getElementById('captureBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z" fill="currentColor"/></svg> {{ _("Capture") }}';
+            document.getElementById('nextActionBtn').style.display = 'none';
+            canvasDrawer.clear();
+        } else {
+            // All actions completed, show finish button
+            document.getElementById('nextActionBtn').style.display = 'none';
+            document.getElementById('finishBtn').style.display = 'inline-flex';
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', initializeApp);
+</script>
+{% endblock %}

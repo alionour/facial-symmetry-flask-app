@@ -1,5 +1,5 @@
 // Infrastructure: Exam Actions Configuration
-import { FacialActions } from '../../domain/entities/ExamAction.js';
+import { FacialActions } from '/static/js/src/domain/entities/ExamAction.js';
 export class ExamActionsConfig {
     static getDefaultActions() {
         return [

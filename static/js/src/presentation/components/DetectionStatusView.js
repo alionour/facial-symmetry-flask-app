@@ -1,6 +1,6 @@
 // Presentation Component: Detection Status View
 // Displays real-time movement detection status and feedback
-import { FacialActions } from '../../domain/entities/ExamAction.js';
+import { FacialActions } from '/static/js/src/domain/entities/ExamAction.js';
 export class DetectionStatusView {
     constructor() {
         this.container = null;

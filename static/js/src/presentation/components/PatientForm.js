@@ -70,7 +70,7 @@ export class PatientForm {
             if (imageChecklist)
                 imageChecklist.style.display = 'none';
             if (startBtnText)
-                startBtnText.textContent = this.translations['Begin Live Video Analysis'] || 'Begin Live Video Analysis';
+                startBtnText.textContent = (this.translations && this.translations['Begin Live Video Analysis']) || 'Begin Live Video Analysis';
         }
         else {
             if (liveChecklist)
