@@ -1,0 +1,252 @@
+/* Results Page Styles - Responsive Design */
+
+/* Base styles */
+.results-container {
+  background: #f6f8fa;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.results-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(44,62,80,0.12);
+  padding: 30px;
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+.results-loading {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.results-error {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.error-card {
+  border-left: 4px solid #e74c3c;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.error-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 25px;
+}
+
+.results-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 140px;
+}
+
+.results-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.results-btn.primary {
+  background: #3498db;
+  color: white;
+}
+
+.results-btn.primary:hover {
+  background: #2980b9;
+}
+
+.results-btn.secondary {
+  background: #95a5a6;
+  color: white;
+}
+
+.results-btn.secondary:hover {
+  background: #7f8c8d;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e1e8ed;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-list {
+  text-align: left;
+  color: #7f8c8d;
+  margin: 0 0 25px 0;
+  padding-left: 20px;
+  line-height: 1.6;
+}
+
+/* Results Footer Styles */
+.results-footer {
+  background: rgba(44, 62, 80, 0.05);
+  border-top: 1px solid rgba(44, 62, 80, 0.1);
+  text-align: center;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.results-footer .footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.results-footer .version-info {
+  font-size: 0.85rem;
+  margin: 0;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+/* Explanation Section */
+.explanation-section {
+  margin: 2rem auto;
+  max-width: 700px;
+  padding: 0 1rem;
+}
+
+.explanation-section h2 {
+  color: #2c3e50;
+  margin-bottom: 0.5em;
+  text-align: center;
+}
+
+.explanation-section h3 {
+  color: #2980b9;
+  margin-top: 1em;
+}
+
+.explanation-section p {
+  color: #34495e;
+  line-height: 1.6;
+}
+
+.explanation-section ul {
+  margin: 1em 0;
+  padding-left: 1.5em;
+}
+
+.explanation-section li {
+  margin: 0.5em 0;
+}
+
+.explanation-section svg {
+  display: block;
+  margin: 8px auto;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Media queries for results page */
+@media (max-width: 768px) {
+  .results-container {
+    padding: 10px;
+  }
+
+  .results-card {
+    padding: 20px;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .results-loading,
+  .results-error {
+    padding: 20px 10px;
+  }
+
+  .error-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .results-btn {
+    min-width: 120px;
+    padding: 12px 20px;
+    font-size: 0.9em;
+    width: 100%;
+    max-width: 250px;
+  }
+
+  /* Fix overall symmetry score layout on mobile */
+  .overall-symmetry-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+
+  .score-display-card,
+  .clinical-interpretation-card {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+
+  .score-display-card h3 {
+    font-size: 1.2em !important;
+  }
+
+  .score-display-card div[style*="font-size: 4em"] {
+    font-size: 3em !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .results-container {
+    padding: 10px;
+  }
+
+  .results-card {
+    padding: 15px;
+    border-radius: 8px;
+  }
+
+  .results-loading,
+  .results-error {
+    padding: 20px 10px;
+  }
+
+  .results-btn {
+    min-width: 100px;
+    padding: 10px 16px;
+    font-size: 0.85em;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
+  }
+}

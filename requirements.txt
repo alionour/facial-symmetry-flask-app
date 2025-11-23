@@ -1,0 +1,6 @@
+Flask
+Flask-Babel
+mediapipe
+opencv-python
+numpy
+fpdf2

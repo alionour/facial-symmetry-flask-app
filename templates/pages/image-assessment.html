@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="../styles/image-assessment.css">
+</head>
+<body>
+
+<div id="imageAssessmentView" class="image-assessment-container">
+  <!-- Navigation Header -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <div class="brand-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H19V9Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="brand-text">{{ _('Image-Based Assessment') }}</span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="goBackToHome()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" fill="currentColor"/>
+          </svg>
+          {{ _('Back to Home') }}
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="content-container">
+      <!-- Progress Header -->
+      <div class="progress-header">
+        <h1 class="page-title">📸 {{ _('Image-Based Facial Symmetry Assessment') }}</h1>
+        <p class="page-description">{{ _('Upload high-quality images for each facial expression to perform detailed analysis') }}</p>
+
+        <div class="progress-bar">
+          <div class="progress-step completed" data-step="1">
+            <div class="step-number">1</div>
+            <span class="step-label">{{ _('Patient Info') }}</span>
+          </div>
+          <div class="progress-step active" data-step="2">
+            <div class="step-number">2</div>
+            <span class="step-label">{{ _('Upload Images') }}</span>
+          </div>
+          <div class="progress-step" data-step="3">
+            <div class="step-number">3</div>
+            <span class="step-label">{{ _('Analysis') }}</span>
+          </div>
+          <div class="progress-step" data-step="4">
+            <div class="step-number">4</div>
+            <span class="step-label">{{ _('Results') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patient Info Summary -->
+      <div class="patient-summary">
+        <h3>{{ _('Patient Information') }}</h3>
+        <div class="patient-details">
+          <span id="patientName">{{ _('Loading...') }}</span> •
+          <span id="patientAge">{{ _('Loading...') }}</span> {{ _('years') }} •
+          ID: <span id="patientId">{{ _('Loading...') }}</span>
+        </div>
+      </div>
+
+      <!-- Image Upload Section -->
+      <div class="upload-section">
+        <h2 class="section-title">{{ _('Required Images') }}</h2>
+        <p class="section-description">{{ _('Please upload clear, high-resolution images for each facial expression. Ensure good lighting and face the camera directly.') }}</p>
+
+        <div class="upload-grid">
+          <!-- Neutral Face -->
+          <div class="upload-card" data-action="baseline">
+            <div class="upload-header">
+              <div class="action-icon">😐</div>
+              <h3 class="action-title">{{ _('Neutral Face') }}</h3>
+              <p class="action-description">{{ _('Relaxed, natural expression') }}</p>
+            </div>
+
+            <div class="upload-area" id="uploadArea_baseline">
+              <input type="file" id="fileInput_baseline" accept="image/*" onchange="handleImageUpload('baseline', this)">
+              <div class="upload-placeholder">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" fill="currentColor"/>
+                </svg>
+                <span class="upload-text">{{ _('Click to upload or drag image here') }}</span>
+                <span class="upload-hint">{{ _('JPG, PNG, WebP (max 10MB)') }}</span>
+              </div>
+              <div class="image-preview" id="preview_baseline" style="display: none;">
+                <img id="previewImg_baseline" src="" alt="Preview">
+                <div class="preview-overlay">
+                  <button class="retake-btn" onclick="retakeImage('baseline')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" fill="currentColor"/>
+                    </svg>
+                    {{ _('Retake') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="upload-status" id="status_baseline">
+              <div class="status-indicator pending">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z" fill="currentColor"/>
+                </svg>
+                <span>{{ _('Waiting for upload') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Eyebrow Elevation -->
+          <div class="upload-card" data-action="eyebrow_raise">
+            <div class="upload-header">
+              <div class="action-icon">🤨</div>
+              <h3 class="action-title">{{ _('Eyebrow Elevation') }}</h3>
+              <p class="action-description">{{ _('Raise eyebrows as high as possible') }}</p>
+            </div>
+
+            <div class="upload-area" id="uploadArea_eyebrow_raise">
+              <input type="file" id="fileInput_eyebrow_raise" accept="image/*" onchange="handleImageUpload('eyebrow_raise', this)">
+              <div class="upload-placeholder">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" fill="currentColor"/>
+                </svg>
+                <span class="upload-text">{{ _('Click to upload or drag image here') }}</span>
+                <span class="upload-hint">{{ _('JPG, PNG, WebP (max 10MB)') }}</span>
+              </div>
+              <div class="image-preview" id="preview_eyebrow_raise" style="display: none;">
+                <img id="previewImg_eyebrow_raise" src="" alt="Preview">
+                <div class="preview-overlay">
+                  <button class="retake-btn" onclick="retakeImage('eyebrow_raise')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" fill="currentColor"/>
+                    </svg>
+                    {{ _('Retake') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="upload-status" id="status_eyebrow_raise">
+              <div class="status-indicator pending">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z" fill="currentColor"/>
+                </svg>
+                <span>{{ _('Waiting for upload') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Eye Closure -->
+          <div class="upload-card" data-action="eye_close">
+            <div class="upload-header">
+              <div class="action-icon">😑</div>
+              <h3 class="action-title">{{ _('Eye Closure') }}</h3>
+              <p class="action-description">{{ _('Close eyes as tightly as possible') }}</p>
+            </div>
+
+            <div class="upload-area" id="uploadArea_eye_close">
+              <input type="file" id="fileInput_eye_close" accept="image/*" onchange="handleImageUpload('eye_close', this)">
+              <div class="upload-placeholder">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" fill="currentColor"/>
+                </svg>
+                <span class="upload-text">{{ _('Click to upload or drag image here') }}</span>
+                <span class="upload-hint">{{ _('JPG, PNG, WebP (max 10MB)') }}</span>
+              </div>
+              <div class="image-preview" id="preview_eye_close" style="display: none;">
+                <img id="previewImg_eye_close" src="" alt="Preview">
+                <div class="preview-overlay">
+                  <button class="retake-btn" onclick="retakeImage('eye_close')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" fill="currentColor"/>
+                    </svg>
+                    {{ _('Retake') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="upload-status" id="status_eye_close">
+              <div class="status-indicator pending">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z" fill="currentColor"/>
+                </svg>
+                <span>{{ _('Waiting for upload') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Smile -->
+          <div class="upload-card" data-action="smile">
+            <div class="upload-header">
+              <div class="action-icon">😊</div>
+              <h3 class="action-title">{{ _('Smile') }}</h3>
+              <p class="action-description">{{ _('Show your biggest smile') }}</p>
+            </div>
+
+            <div class="upload-area" id="uploadArea_smile">
+              <input type="file" id="fileInput_smile" accept="image/*" onchange="handleImageUpload('smile', this)">
+              <div class="upload-placeholder">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" fill="currentColor"/>
+                </svg>
+                <span class="upload-text">{{ _('Click to upload or drag image here') }}</span>
+                <span class="upload-hint">{{ _('JPG, PNG, WebP (max 10MB)') }}</span>
+              </div>
+              <div class="image-preview" id="preview_smile" style="display: none;">
+                <img id="previewImg_smile" src="" alt="Preview">
+                <div class="preview-overlay">
+                  <button class="retake-btn" onclick="retakeImage('smile')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" fill="currentColor"/>
+                    </svg>
+                    {{ _('Retake') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="upload-status" id="status_smile">
+              <div class="status-indicator pending">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z" fill="currentColor"/>
+                </svg>
+                <span>{{ _('Waiting for upload') }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-section">
+        <div class="upload-summary">
+          <div class="summary-item">
+            <span class="summary-label">{{ _('Images uploaded:') }}</span>
+            <span class="summary-value" id="uploadCount">0 / 4</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">{{ _('Total size:') }}</span>
+            <span class="summary-value" id="totalSize">0 MB</span>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="secondary-btn" onclick="goBackToHome()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" fill="currentColor"/>
+            </svg>
+            {{ _('Back to Home') }}
+          </button>
+
+          <button class="primary-btn" id="analyzeBtn" disabled onclick="startImageAnalysis()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9,2V7.38L10.5,8.88L12,7.38V2H9M20,2H17V9L15,7L13,9V2H4A2,2 0 0,0 2,4V20A2,2 0 0,0 4,22H20A2,2 0 0,0 22,20V4A2,2 0 0,0 20,2M8.5,12.5L11,16.5L14.5,11L19,18H5L8.5,12.5Z" fill="currentColor"/>
+            </svg>
+            <span id="analyzeBtnText">{{ _('Analyze Images') }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+
+
+
+<!-- Image Assessment JavaScript is now handled by the ImageAssessmentModule.js -->
+<script>
+// Function to populate patient information from localStorage
+window.populatePatientInformation = function populatePatientInformation() {
+  console.log('[DEBUG] populatePatientInformation called');
+
+  try {
+    // Get patient data from localStorage
+    const patientDataStr = localStorage.getItem('currentPatientData');
+    console.log('[DEBUG] Patient data from localStorage:', patientDataStr);
+
+    if (patientDataStr) {
+      const patientData = JSON.parse(patientDataStr);
+      console.log('[DEBUG] Parsed patient data:', patientData);
+
+      // Update patient display elements
+      const patientNameEl = document.getElementById('patientName');
+      const patientAgeEl = document.getElementById('patientAge');
+      const patientIdEl = document.getElementById('patientId');
+
+      console.log('[DEBUG] Found elements:', {
+        patientNameEl: !!patientNameEl,
+        patientAgeEl: !!patientAgeEl,
+        patientIdEl: !!patientIdEl
+      });
+
+      if (patientNameEl && patientData.name) {
+        patientNameEl.textContent = patientData.name;
+        console.log('[DEBUG] Updated patient name:', patientData.name);
+      } else {
+        console.warn('[DEBUG] Could not update patient name:', { element: !!patientNameEl, data: patientData.name });
+      }
+
+      if (patientAgeEl && patientData.age) {
+        patientAgeEl.textContent = patientData.age;
+        console.log('[DEBUG] Updated patient age:', patientData.age);
+      } else {
+        console.warn('[DEBUG] Could not update patient age:', { element: !!patientAgeEl, data: patientData.age });
+      }
+
+      if (patientIdEl && patientData.id) {
+        patientIdEl.textContent = patientData.id;
+        console.log('[DEBUG] Updated patient ID:', patientData.id);
+      } else {
+        console.warn('[DEBUG] Could not update patient ID:', { element: !!patientIdEl, data: patientData.id });
+      }
+
+      console.log('[DEBUG] Patient information populated successfully');
+      return true;
+    } else {
+      console.warn('[DEBUG] No patient data found in localStorage');
+      return false;
+    }
+  } catch (error) {
+    console.error('[DEBUG] Error populating patient information:', error);
+    return false;
+  }
+}
+
+// Try to populate immediately
+console.log('[DEBUG] Image assessment HTML loaded - attempting immediate population');
+window.populatePatientInformation();
+
+// Also try after DOM is fully ready
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('[DEBUG] DOMContentLoaded - attempting population');
+  window.populatePatientInformation();
+});
+
+// Try again after a short delay to handle timing issues
+setTimeout(function() {
+  console.log('[DEBUG] Delayed population attempt');
+  window.populatePatientInformation();
+}, 100);
+
+// Placeholder script - actual functionality is loaded via module
+console.log('Image assessment functionality will be provided by module');
+</script>
+
+</body>
+</html>

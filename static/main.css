@@ -1,0 +1,308 @@
+/* Main Application Styles - Global Base Styles */
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f6f8fa;
+  margin: 0;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+h2 {
+  color: #2c3e50;
+  text-align: center;
+  margin: 20px 0;
+  font-size: 1.5em;
+  padding: 0 20px;
+}
+
+/* Responsive container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+}
+
+/* Legacy output styles for compatibility */
+#output {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+  width: 100%;
+  max-width: 640px;
+  text-align: center;
+}
+
+#video, #canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4/3;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(44,62,80,0.12);
+  margin: 0;
+  padding: 0;
+  z-index: 1;
+}
+
+#canvas {
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Patient form responsive styles */
+#patientForm {
+  margin: 20px auto;
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(44,62,80,0.10);
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+#patientForm label {
+  display: flex;
+  flex-direction: column;
+  font-size: 1em;
+  color: #34495e;
+  margin-bottom: 0;
+}
+
+#patientForm input {
+  margin-top: 6px;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1em;
+  background: #f9fafb;
+  transition: border 0.2s;
+  width: 100%;
+}
+
+#patientForm input:focus {
+  border: 1.5px solid #3498db;
+  outline: none;
+  background: #fff;
+}
+
+#patientForm button {
+  margin-top: 10px;
+  padding: 12px 0;
+  background: linear-gradient(90deg, #3498db 60%, #6dd5fa 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(52,152,219,0.08);
+  transition: background 0.2s;
+  width: 100%;
+}
+
+#patientForm button:hover {
+  background: linear-gradient(90deg, #217dbb 60%, #4fc3f7 100%);
+}
+
+/* Responsive button styles */
+.btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 5px;
+  min-width: 120px;
+}
+
+.btn-primary {
+  background: #3498db;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #229954;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #95a5a6;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #7f8c8d;
+  transform: translateY(-1px);
+}
+
+/* Media Queries for Responsive Design */
+
+/* Large screens (desktops) */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+
+  h2 {
+    font-size: 2em;
+  }
+}
+
+/* Medium screens (tablets) */
+@media (max-width: 1199px) and (min-width: 768px) {
+  .container {
+    max-width: 960px;
+  }
+
+  #patientForm {
+    max-width: 500px;
+    padding: 30px;
+  }
+
+  .btn {
+    min-width: 140px;
+    padding: 14px 24px;
+  }
+}
+
+/* Small screens (mobile landscape) */
+@media (max-width: 767px) and (min-width: 576px) {
+  .container {
+    padding: 0 15px;
+  }
+
+  h2 {
+    font-size: 1.3em;
+    margin: 15px 0;
+  }
+
+  #patientForm {
+    margin: 15px auto;
+    padding: 20px;
+    max-width: 100%;
+  }
+
+  .btn {
+    min-width: 100px;
+    padding: 12px 16px;
+    font-size: 0.9em;
+    margin: 3px;
+  }
+}
+
+/* Extra small screens (mobile portrait) */
+@media (max-width: 575px) {
+  .container {
+    padding: 0 10px;
+    width: 100%;
+  }
+
+  h2 {
+    font-size: 1.2em;
+    margin: 10px 0;
+    padding: 0 10px;
+  }
+
+  #patientForm {
+    margin: 10px auto;
+    padding: 15px;
+    border-radius: 8px;
+    width: calc(100% - 20px);
+    max-width: 100%;
+  }
+
+  #patientForm input {
+    padding: 12px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #patientForm button {
+    padding: 14px 0;
+    font-size: 16px;
+    width: 100%;
+  }
+
+  .btn {
+    min-width: 80px;
+    padding: 12px 16px;
+    font-size: 0.9em;
+    margin: 2px;
+    border-radius: 6px;
+    touch-action: manipulation;
+  }
+
+  #output {
+    margin: 10px auto;
+    padding: 0 10px;
+    width: 100%;
+  }
+
+  #video, #canvas {
+    border-radius: 8px;
+    width: 100% !important;
+    height: auto !important;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 375px) {
+  .container {
+    padding: 0 5px;
+  }
+
+  h2 {
+    font-size: 1.1em;
+    margin: 8px 0;
+    padding: 0 5px;
+  }
+
+  #patientForm {
+    margin: 5px auto;
+    padding: 12px;
+    width: calc(100% - 10px);
+  }
+
+  #patientForm input {
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  .btn {
+    min-width: 70px;
+    padding: 10px 12px;
+    font-size: 0.85em;
+    margin: 1px;
+  }
+}
