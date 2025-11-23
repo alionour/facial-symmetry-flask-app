@@ -583,6 +583,7 @@ export class ResultsView {
               Symmetry Measurements
             </h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+              ${this.generateRestingSymmetryCard(results.restingSymmetry)}
               ${this.generateDetailedMetricCard('Eyebrow Analysis', results)}
               ${this.generateDetailedMetricCard('Eye Analysis', results)}
               ${this.generateDetailedMetricCard('Mouth Analysis', results)}
@@ -730,12 +731,54 @@ export class ResultsView {
                 return '#c0392b'; // Dark red
             default:
                 return '#7f8c8d'; // Gray
-        }
-    }
-    /**
-     * Generate detailed metric card showing individual measurements
-     */
-    generateDetailedMetricCard(title, metrics) {
+                }
+            }
+        
+            generateRestingSymmetryCard(restingSymmetry) {
+                if (!restingSymmetry) {
+                    return '';
+                }
+        
+                const { eye_fissure_width, brow_position, nasolabial_fold, oral_commissure } = restingSymmetry;
+        
+                return `
+              <div style="
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                border-left: 4px solid #3498db;
+              ">
+                <h4 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 1.1em;">Resting Symmetry</h4>
+                
+                <div style="margin-bottom: 10px;">
+                  <strong>Eye Fissure Width:</strong>
+                  <div>Left: ${eye_fissure_width.left.toFixed(4)}, Right: ${eye_fissure_width.right.toFixed(4)}, Asymmetry: ${eye_fissure_width.asymmetry.toFixed(4)}</div>
+                </div>
+        
+                <div style="margin-bottom: 10px;">
+                  <strong>Brow Position:</strong>
+                  <div>Left: ${brow_position.left.toFixed(4)}, Right: ${brow_position.right.toFixed(4)}, Asymmetry: ${brow_position.asymmetry.toFixed(4)}</div>
+                </div>
+        
+                <div style="margin-bottom: 10px;">
+                  <strong>Nasolabial Fold:</strong>
+                  <div>Left: ${nasolabial_fold.left.toFixed(4)}, Right: ${nasolabial_fold.right.toFixed(4)}, Asymmetry: ${nasolabial_fold.asymmetry.toFixed(4)}</div>
+                </div>
+        
+                <div>
+                  <strong>Oral Commissure:</strong>
+                  <div>Vertical - Left: ${oral_commissure.vertical.left.toFixed(4)}, Right: ${oral_commissure.vertical.right.toFixed(4)}, Asymmetry: ${oral_commissure.vertical.asymmetry.toFixed(4)}</div>
+                  <div>Horizontal - Left: ${oral_commissure.horizontal.left.toFixed(4)}, Right: ${oral_commissure.horizontal.right.toFixed(4)}, Asymmetry: ${oral_commissure.horizontal.asymmetry.toFixed(4)}</div>
+                </div>
+              </div>
+            `;
+            }
+        
+            /**
+             * Generate detailed metric card showing individual measurements
+             */
+            generateDetailedMetricCard(title, metrics) {
         let content = '';
         let overallScore = 0;
         let overallStatus = '';

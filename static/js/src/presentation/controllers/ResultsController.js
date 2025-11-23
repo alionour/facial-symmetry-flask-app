@@ -139,23 +139,37 @@ export class ResultsController {
             // Hide loading and error states
             this.hideLoadingState();
             this.hideErrorState();
-            // Transform the results to match the expected format
+
+            const analysisResults = results.complete_analysis_results;
+
+            // Fetch resting symmetry results
+            if (analysisResults && analysisResults.rawLandmarkData && analysisResults.rawLandmarkData.baseline) {
+                const neutralLandmarks = analysisResults.rawLandmarkData.baseline;
+                const response = await fetch('/api/analyze-resting-symmetry', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ landmarks: neutralLandmarks }),
+                });
+                if (response.ok) {
+                    const restingSymmetryData = await response.json();
+                    analysisResults.restingSymmetry = restingSymmetryData.results;
+                }
+            }
+
             // Set results in the ResultsView
-            this.resultsView.setResults(results.complete_analysis_results);
-            // Wait for results content container to be available (increased timeout and extra logging)
+            this.resultsView.setResults(analysisResults);
+
             const resultsContent = await this.waitForElement('resultsContent', 10000);
             if (!resultsContent) {
                 throw new Error('Results content container not found after waiting');
             }
-            // Generate and insert the results HTML
             resultsContent.innerHTML = this.resultsView.generateResultsHTML();
             resultsContent.style.display = 'block';
-            // Set up event listeners for the results page (with delay to ensure DOM is ready)
+
             setTimeout(() => {
                 this.setupResultsEventListeners();
             }, 100);
-        }
-        catch (error) {
+        } catch (error) {
             this.showErrorState();
         }
     }

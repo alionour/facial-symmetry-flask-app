@@ -5,6 +5,7 @@ from services.clinical_calculations import ClinicalAnalysisService, MetricCalcul
 from services.clinical_comparison import ClinicalComparisonService, DistanceEstimationService
 from services.pdf_generator import generate_pdf, generate_csv, generate_markdown
 from services.domain_models import Patient, ExamSession
+from services.resting_symmetry_analysis import RestingSymmetryAnalysisService
 from io import BytesIO
 
 class ExamActionsConfig:
@@ -616,9 +617,6 @@ def start_exam():
         exam_session = ExamSession(patient, actions)
         exam_session.start()
 
-        # Storing the session object directly in the Flask session is not recommended
-        # as it can lead to issues with serialization. Instead, we store a dictionary
-        # representation of the session.
         session['exam_session'] = exam_session.to_dict()
         session.modified = True
 
@@ -626,6 +624,27 @@ def start_exam():
 
     except Exception as e:
         print(f"Error in /api/start-exam: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analyze-resting-symmetry', methods=['POST'])
+def analyze_resting_symmetry():
+    """
+    Analyzes resting symmetry from facial landmarks.
+    """
+    try:
+        data = request.get_json()
+        if not data or 'landmarks' not in data:
+            return jsonify({'success': False, 'error': 'No landmarks provided'}), 400
+
+        landmarks = data['landmarks']
+        analysis_service = RestingSymmetryAnalysisService()
+        results = analysis_service.analyze_resting_symmetry(landmarks)
+
+        return jsonify({'success': True, 'results': results})
+
+    except Exception as e:
+        print(f"Error in /api/analyze-resting-symmetry: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
