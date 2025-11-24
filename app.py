@@ -11,7 +11,7 @@ from io import BytesIO
 class ExamActionsConfig:
     @staticmethod
     def get_default_actions():
-        return ["neutral", "eyebrow_raise", "eye_close", "smile"]
+        return ["neutral", "eyebrow_raise", "eye_close", "smile", "snarl", "lip_pucker"]
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'a_secret_key'
@@ -58,10 +58,14 @@ def get_translations():
         'eyebrow_raise_instruction': _('Please raise your eyebrows as high as possible.'),
         'eye_close_instruction': _('Please close your eyes tightly.'),
         'smile_instruction': _('Please smile broadly showing your teeth.'),
+        'snarl_instruction': _('Please raise your upper lip as if to snarl.'),
+        'lip_pucker_instruction': _('Please pucker your lips as tightly as possible.'),
         'NEUTRAL': _('NEUTRAL'),
         'EYEBROW_RAISE': _('EYEBROW RAISE'),
         'EYE_CLOSE': _('EYE CLOSE'),
         'SMILE': _('SMILE'),
+        'SNARL': _('SNARL'),
+        'LIP_PUCKER': _('LIP PUCKER'),
         'Head Alignment': _('Head Alignment'),
         'Tilt': _('Tilt'),
         'Rotation': _('Rotation'),
@@ -558,6 +562,8 @@ def process_facial_data():
             'eyebrow_raise': ['forehead'],
             'eye_close': ['eye_gap'],
             'smile': ['smile', 'lip'],
+            'snarl': ['snarl'],
+            'lip_pucker': ['lip_pucker'],
         }
 
         results = []

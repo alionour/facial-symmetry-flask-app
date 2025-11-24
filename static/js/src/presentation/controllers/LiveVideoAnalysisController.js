@@ -137,12 +137,10 @@ export class LiveVideoAnalysisController {
      * @returns Movement magnitude (scaled for peak comparison)
      */
     PickBestMovementActionFrame(actionType, currentLandmarks, baselineLandmarks) {
-        // Validate input landmarks using utility
         if (!LandmarkUtils.validateLandmarkPair(baselineLandmarks, currentLandmarks)) {
             return 0;
         }
         try {
-            // Route to action-specific calculation methods using enum
             switch (actionType) {
                 case FacialActions.Smile:
                     return this.pickBestSmileFrame(currentLandmarks, baselineLandmarks);
@@ -150,6 +148,12 @@ export class LiveVideoAnalysisController {
                     return this.pickBestEyebrowRaiseFrame(currentLandmarks, baselineLandmarks);
                 case FacialActions.EyeClosure:
                     return this.pickBestEyeClosureFrame(currentLandmarks, baselineLandmarks);
+                case FacialActions.Snarl:
+                    // Generic movement detection for snarl for now
+                    return this.calculateGenericMovement(currentLandmarks, baselineLandmarks);
+                case FacialActions.LipPucker:
+                    // Generic movement detection for lip pucker for now
+                    return this.calculateGenericMovement(currentLandmarks, baselineLandmarks);
                 case FacialActions.neutral:
                 default:
                     return 0;
@@ -159,6 +163,18 @@ export class LiveVideoAnalysisController {
             return 0;
         }
     }
+
+    calculateGenericMovement(currentLandmarks, baselineLandmarks) {
+        // Simple generic movement calculation: sum of distances from baseline
+        let totalMovement = 0;
+        for (let i = 0; i < currentLandmarks.length; i++) {
+            if (currentLandmarks[i] && baselineLandmarks[i]) {
+                totalMovement += LandmarkUtils.distance3D(currentLandmarks[i], baselineLandmarks[i]);
+            }
+        }
+        return totalMovement * 100; // Scale for peak detection sensitivity
+    }
+
     pickBestSmileFrame(currentLandmarks, baselineLandmarks) {
         try {
             // 🔬 Use ClinicalAnalysisService for accurate, medical-grade smile movement calculation
@@ -752,28 +768,25 @@ export class LiveVideoAnalysisController {
         const currentAction = this.getCurrentActionType();
         const nextBtn = document.getElementById('nextBtn');
         const finishBtn = document.getElementById('finishBtn');
-        // Check if this is the final action (Smile Wide)
-        if (currentAction === 'smile' || this.examOrchestrator.isExamCompleted()) {
-            // Final action - show finish button, hide next button
+
+        if (this.examOrchestrator.isExamCompleted()) {
             if (nextBtn) {
                 nextBtn.style.display = 'none';
             }
             if (finishBtn) {
                 finishBtn.style.display = 'inline-block';
                 finishBtn.textContent = 'Finish Examination';
-                finishBtn.className = 'btn btn-success btn-lg'; // Green styling for completion
+                finishBtn.className = 'btn btn-success btn-lg';
                 finishBtn.style.backgroundColor = '#28a745';
                 finishBtn.style.borderColor = '#28a745';
                 finishBtn.style.color = 'white';
                 finishBtn.style.fontWeight = 'bold';
             }
-        }
-        else {
-            // Regular actions - show next button, hide finish button
+        } else {
             if (nextBtn) {
                 nextBtn.style.display = 'inline-block';
                 nextBtn.textContent = this.translations['Next Action'] || 'Next Action';
-                nextBtn.className = 'btn btn-primary btn-lg'; // Standard blue styling
+                nextBtn.className = 'btn btn-primary btn-lg';
             }
             if (finishBtn) {
                 finishBtn.style.display = 'none';
@@ -922,14 +935,17 @@ export class LiveVideoAnalysisController {
             baseline: this.landmarkStorage.get(FacialActions.neutral)?.peakFrame || [],
             eyebrowRaise: this.landmarkStorage.get(FacialActions.EyebrowRaise)?.peakFrame || [],
             eyeClose: this.landmarkStorage.get(FacialActions.EyeClosure)?.peakFrame || [],
-            smile: this.landmarkStorage.get(FacialActions.Smile)?.peakFrame || []
+            smile: this.landmarkStorage.get(FacialActions.Smile)?.peakFrame || [],
+            snarl: this.landmarkStorage.get(FacialActions.Snarl)?.peakFrame || [],
+            lipPucker: this.landmarkStorage.get(FacialActions.LipPucker)?.peakFrame || [],
         };
-        // Map enum values to the expected camelCase property names in CompleteAnalysisResult interface
         const peakFrameImages = {
             baseline: this.landmarkStorage.get(FacialActions.neutral)?.peakFrameImage,
             eyebrowRaise: this.landmarkStorage.get(FacialActions.EyebrowRaise)?.peakFrameImage,
             eyeClose: this.landmarkStorage.get(FacialActions.EyeClosure)?.peakFrameImage,
-            smile: this.landmarkStorage.get(FacialActions.Smile)?.peakFrameImage
+            smile: this.landmarkStorage.get(FacialActions.Smile)?.peakFrameImage,
+            snarl: this.landmarkStorage.get(FacialActions.Snarl)?.peakFrameImage,
+            lipPucker: this.landmarkStorage.get(FacialActions.LipPucker)?.peakFrameImage,
         };
         // Debug: Log what images we have
         console.log('🖼️ Peak Frame Images Debug:');

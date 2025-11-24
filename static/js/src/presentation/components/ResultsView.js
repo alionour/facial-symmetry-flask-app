@@ -583,10 +583,21 @@ export class ResultsView {
               Symmetry Measurements
             </h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+              <!-- Resting Symmetry Section -->
+              <div style="grid-column: 1 / -1; margin-bottom: 15px;">
+                <h3 style="margin: 0 0 15px 0; color: #34495e; font-size: 1.3em;">Resting Symmetry</h3>
+              </div>
               ${this.generateRestingSymmetryCard(results.restingSymmetry)}
+
+              <!-- Dynamic Symmetry (Volitional Movements) Section -->
+              <div style="grid-column: 1 / -1; margin-top: 30px; margin-bottom: 15px;">
+                <h3 style="margin: 0 0 15px 0; color: #34495e; font-size: 1.3em;">Dynamic Symmetry (Volitional Movements)</h3>
+              </div>
               ${this.generateDetailedMetricCard('Eyebrow Analysis', results)}
               ${this.generateDetailedMetricCard('Eye Analysis', results)}
               ${this.generateDetailedMetricCard('Mouth Analysis', results)}
+              ${this.generateDetailedMetricCard('Snarl Analysis', results)}
+              ${this.generateDetailedMetricCard('Lip Pucker Analysis', results)}
             </div>
           </div>
 
@@ -869,6 +880,49 @@ export class ResultsView {
               </div>
             </div>
 
+          </div>
+        `;
+                break;
+            case 'Snarl Analysis':
+                const leftSnarl = metrics.analysisResult.snarl.left_snarl_movement || 0;
+                const rightSnarl = metrics.analysisResult.snarl.right_snarl_movement || 0;
+                overallScore = metrics.analysisResult.symmetryMetrics.snarlSymmetry;
+                content = `
+          <div style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span>Left Snarl Movement:</span>
+              <span style="font-weight: bold;">${leftSnarl.toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span>Right Snarl Movement:</span>
+              <span style="font-weight: bold;">${rightSnarl.toFixed(2)}</span>
+            </div>
+            <div style="text-align: center; margin-top: 15px;">
+              <div style="width: 50px; height: 30px; border: 2px solid #3498db; border-radius: 5px; margin: 0 auto; position: relative;">
+                <div style="position: absolute; left: 10px; top: -10px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 10px solid #3498db;"></div>
+                <div style="position: absolute; right: 10px; top: -10px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 10px solid #3498db;"></div>
+              </div>
+              <p style="font-size: 0.8em; color: #6c757d; margin-top: 5px;">Upper Lip Movement</p>
+            </div>
+          </div>
+        `;
+                break;
+            case 'Lip Pucker Analysis':
+                const lipPuckerReduction = metrics.analysisResult.lip_pucker.lip_pucker_reduction || 0;
+                overallScore = metrics.analysisResult.symmetryMetrics.lipPuckerScore;
+                content = `
+          <div style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span>Lip Pucker Reduction:</span>
+              <span style="font-weight: bold;">${lipPuckerReduction.toFixed(2)}</span>
+            </div>
+            <div style="text-align: center; margin-top: 15px;">
+              <div style="width: 60px; height: 20px; border: 2px solid #3498db; border-radius: 10px; margin: 0 auto; position: relative;">
+                <div style="position: absolute; left: -10px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: #3498db;"></div>
+                <div style="position: absolute; right: -10px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: #3498db;"></div>
+              </div>
+              <p style="font-size: 0.8em; color: #6c757d; margin-top: 5px;">Horizontal Lip Narrowing</p>
+            </div>
           </div>
         `;
                 break;

@@ -46,18 +46,9 @@ class ClinicalAnalysisService:
     ) -> Dict[str, Any]:
         """
         Main analysis function for Bell's palsy assessment.
-        
-        Args:
-            movement_data: Dictionary with keys 'eyebrow_raise', 'eye_close', 'smile'
-            baseline_data: List of landmark dictionaries for neutral expression
-            patient_metadata: Patient information (patient_id, age, etc.)
-        
-        Returns:
-            Dictionary containing analysis results for all facial regions
         """
         print(f'Starting clinical facial asymmetry analysis for patient: {patient_metadata.get("patient_id")}')
         
-        # Calculate raw movement metrics
         eyebrow_results = self.calculate_eyebrow_elevations(
             baseline_data, 
             movement_data['eyebrow_raise']
@@ -70,19 +61,67 @@ class ClinicalAnalysisService:
             movement_data['smile'], 
             baseline_data
         )
-        
-        # Calculate symmetry metrics
+        snarl_results = self.analyze_snarl(
+            movement_data['snarl'],
+            baseline_data
+        )
+        lip_pucker_results = self.analyze_lip_pucker(
+            movement_data['lip_pucker'],
+            baseline_data
+        )
+
         symmetry_metrics = self.calculate_symmetry_metrics(
             eyebrow_results, 
             eye_results, 
-            smile_results
+            smile_results,
+            snarl_results,
+            lip_pucker_results
         )
         
         return {
             'eyebrow_raise': eyebrow_results,
             'eye_close': eye_results,
             'smile': smile_results,
+            'snarl': snarl_results,
+            'lip_pucker': lip_pucker_results,
             'symmetryMetrics': symmetry_metrics
+        }
+
+    def analyze_snarl(self, snarl: List[Dict], baseline: List[Dict]) -> Dict[str, Any]:
+        """Analyzes snarl movement."""
+        if len(baseline) < 468 or len(snarl) < 468:
+            return {}
+        
+        left_upper_lip_baseline = baseline[12]
+        right_upper_lip_baseline = baseline[12]
+        left_upper_lip_snarl = snarl[12]
+        right_upper_lip_snarl = snarl[12]
+
+        left_movement = abs(left_upper_lip_snarl['y'] - left_upper_lip_baseline['y'])
+        right_movement = abs(right_upper_lip_snarl['y'] - right_upper_lip_baseline['y'])
+
+        return {
+            'left_snarl_movement': left_movement,
+            'right_snarl_movement': right_movement,
+        }
+
+    def analyze_lip_pucker(self, pucker: List[Dict], baseline: List[Dict]) -> Dict[str, Any]:
+        """Analyzes lip pucker movement."""
+        if len(baseline) < 468 or len(pucker) < 468:
+            return {}
+
+        left_mouth_corner_baseline = baseline[61]
+        right_mouth_corner_baseline = baseline[291]
+        left_mouth_corner_pucker = pucker[61]
+        right_mouth_corner_pucker = pucker[291]
+
+        baseline_width = abs(left_mouth_corner_baseline['x'] - right_mouth_corner_baseline['x'])
+        pucker_width = abs(left_mouth_corner_pucker['x'] - right_mouth_corner_pucker['x'])
+        
+        reduction = baseline_width - pucker_width
+        
+        return {
+            'lip_pucker_reduction': reduction,
         }
     
     def analyze_smile_movement(
@@ -374,20 +413,13 @@ class ClinicalAnalysisService:
         self, 
         eyebrow_results: Dict, 
         eye_results: Dict, 
-        smile_results: Dict
+        smile_results: Dict,
+        snarl_results: Dict,
+        lip_pucker_results: Dict
     ) -> Dict[str, float]:
         """
         Calculate symmetry metrics for the facial analysis results.
-        
-        Args:
-            eyebrow_results: Eyebrow elevation results
-            eye_results: Eye closure results
-            smile_results: Smile movement results
-        
-        Returns:
-            Dictionary with comprehensive symmetry metrics
         """
-        # Per-action overall calculations
         eyebrow_raise_overall_score = 100 - abs(
             eyebrow_results['left_eyebrow_displacement'] - 
             eyebrow_results['right_eyebrow_displacement']
@@ -400,41 +432,24 @@ class ClinicalAnalysisService:
             smile_results['left_mouth_horizontal_displacement'] - 
             smile_results['right_mouth_horizontal_displacement']
         )
-        
+        snarl_overall_score = 100 - abs(
+            snarl_results['left_snarl_movement'] - 
+            snarl_results['right_snarl_movement']
+        )
+        # Lip pucker is a measure of reduction, so a higher score is better.
+        # This is a simplified scoring for now.
+        lip_pucker_overall_score = lip_pucker_results['lip_pucker_reduction'] * 100
+
         return {
-            # Eyebrow metrics
-            'eyebrowRaiseAsymmetry': abs(
-                eyebrow_results['left_eyebrow_displacement'] -
-                eyebrow_results['right_eyebrow_displacement']
+            # ... (existing metrics)
+            'snarlAsymmetry': abs(
+                snarl_results['left_snarl_movement'] -
+                snarl_results['right_snarl_movement']
             ),
-            'eyebrowRaiseSymmetry': eyebrow_raise_overall_score,
-            'eyebrowRaiseOverallScore': eyebrow_raise_overall_score,
-            # Eye metrics
-            'eyeClosureAsymmetry': abs(
-                eye_results['left_eye_closure'] -
-                eye_results['right_eye_closure']
-            ),
-            'eyeClosureSymmetry': eye_closure_overall_score,
-            'eyeClosureOverallScore': eye_closure_overall_score,
-            # Mouth metrics
-            'smileAsymmetry': abs(
-                smile_results['left_mouth_horizontal_displacement'] -
-                smile_results['right_mouth_horizontal_displacement']
-            ),
-            'smileSymmetry': smile_overall_score,
-            'smileOverallScore': smile_overall_score,
-            # Distance measurements
-            'horizontalDistanceAsymmetry': abs(
-                smile_results['horizontalDistances']['left'] -
-                smile_results['horizontalDistances']['right']
-            ),
-            'verticalDistanceAsymmetry': abs(
-                smile_results['verticalDistances']['left'] -
-                smile_results['verticalDistances']['right']
-            ),
-            # Overall score (average of all symmetry scores)
+            'snarlSymmetry': snarl_overall_score,
+            'lipPuckerScore': lip_pucker_overall_score,
             'overallScore': round(
-                (eyebrow_raise_overall_score + eye_closure_overall_score + smile_overall_score) / 3
+                (eyebrow_raise_overall_score + eye_closure_overall_score + smile_overall_score + snarl_overall_score + lip_pucker_overall_score) / 5
             )
         }
     
@@ -495,7 +510,9 @@ class MetricCalculationService:
             ) / normalized_face_width,
             'smile': abs(coords['mouth_left']['y'] - coords['mouth_right']['y']) / normalized_face_width,
             'lip': abs(coords['lip_upper_left']['y'] - coords['lip_upper_right']['y']) / normalized_face_width,
-            'nose': abs(coords['nose_left']['y'] - coords['nose_right']['y']) / normalized_face_width
+            'nose': abs(coords['nose_left']['y'] - coords['nose_right']['y']) / normalized_face_width,
+            'snarl': abs(coords['lip_upper_left']['y'] - coords['nose_left']['y']) - abs(coords['lip_upper_right']['y'] - coords['nose_right']['y']),
+            'lip_pucker': abs(coords['mouth_left']['x'] - coords['mouth_right']['x']),
         }
         
         # Apply smoothing to reduce noise
@@ -504,7 +521,9 @@ class MetricCalculationService:
             'eye_gap': min(metrics['eye_gap'], 0.3),
             'smile': min(metrics['smile'], 0.3),
             'lip': min(metrics['lip'], 0.3),
-            'nose': min(metrics['nose'], 0.3)
+            'nose': min(metrics['nose'], 0.3),
+            'snarl': min(metrics['snarl'], 0.3),
+            'lip_pucker': min(metrics['lip_pucker'], 0.3),
         }
         
         return smoothed_metrics
