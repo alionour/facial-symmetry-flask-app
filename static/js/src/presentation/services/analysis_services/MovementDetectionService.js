@@ -16,7 +16,9 @@ export class MovementDetectionService {
             FacialActions.neutral,
             FacialActions.EyebrowRaise,
             FacialActions.EyeClosure,
-            FacialActions.Smile
+            FacialActions.Smile,
+            FacialActions.Snarl,
+            FacialActions.LipPucker
         ];
         actionTypes.forEach(action => {
             this.detectionHistory.set(action, []);
@@ -83,6 +85,18 @@ export class MovementDetectionService {
                     ...baseCriteria,
                     minMovementIntensity: 0.01, // Reduced from 0.02 for better detection
                     requiredLandmarks: [61, 291, 13, 14, 17, 18] // Mouth landmarks
+                };
+            case FacialActions.Snarl:
+                return {
+                    ...baseCriteria,
+                    minMovementIntensity: 0.015, // Further increased to prevent false activation
+                    requiredLandmarks: [0, 6, 98, 327, 61, 291] // Upper lip, nose bridge, nostrils
+                };
+            case FacialActions.LipPucker:
+                return {
+                    ...baseCriteria,
+                    minMovementIntensity: 0.01,
+                    requiredLandmarks: [13, 14, 61, 291, 0, 17] // Upper/lower lip centers, corners
                 };
             default:
                 return {
@@ -253,7 +267,9 @@ export class MovementDetectionService {
             FacialActions.neutral,
             FacialActions.EyebrowRaise,
             FacialActions.EyeClosure,
-            FacialActions.Smile
+            FacialActions.Smile,
+            FacialActions.Snarl,
+            FacialActions.LipPucker
         ];
         const status = this.getDetectionStatus();
         return requiredActions.every(action => status.get(action) === true);

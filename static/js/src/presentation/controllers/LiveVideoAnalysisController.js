@@ -91,7 +91,95 @@ export class LiveVideoAnalysisController {
         this.detectionStatusView = new DetectionStatusView();
         // Initialize camera service
         this.cameraService = new CameraService(this.cameraRepository);
+        // Initialize actions progress tracker
+        this.initializeActionsProgress();
     }
+
+    /**
+     * Initialize the actions progress tracker UI
+     */
+    initializeActionsProgress() {
+        const progressList = document.getElementById('actionsProgressList');
+        if (!progressList) return;
+
+        // Get all actions from the exam orchestrator
+        const actions = this.examOrchestrator?.actions || [
+            FacialActions.neutral,
+            FacialActions.EyebrowRaise,
+            FacialActions.EyeClosure,
+            FacialActions.Smile
+        ];
+
+        // Action display names with clear descriptions
+        const actionNames = {
+            [FacialActions.neutral]: 'Neutral',
+            [FacialActions.EyebrowRaise]: 'Eyebrow Raise',
+            [FacialActions.EyeClosure]: 'Eye Closure',
+            [FacialActions.Smile]: 'Smile',
+            [FacialActions.Snarl]: 'Nose Wrinkle (Snarl)',
+            [FacialActions.LipPucker]: 'Lip Pucker'
+        };
+
+        // Clear existing content
+        progressList.innerHTML = '';
+
+        // Create progress items for each action
+        actions.forEach((action, index) => {
+            const item = document.createElement('div');
+            item.className = 'action-progress-item pending';
+            item.dataset.action = action;
+
+            const icon = document.createElement('div');
+            icon.className = 'action-progress-icon';
+            icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>';
+
+            const text = document.createElement('span');
+            text.textContent = actionNames[action] || action;
+
+            item.appendChild(icon);
+            item.appendChild(text);
+            progressList.appendChild(item);
+        });
+    }
+
+    /**
+     * Update the actions progress tracker based on current action
+     */
+    updateActionsProgress() {
+        const progressList = document.getElementById('actionsProgressList');
+        if (!progressList) return;
+
+        const currentAction = this.examOrchestrator?.getCurrentAction();
+        const currentIndex = this.examOrchestrator?.currentActionIndex || 0;
+
+        // Update all action items
+        const items = progressList.querySelectorAll('.action-progress-item');
+        items.forEach((item, index) => {
+            const action = item.dataset.action;
+
+            // Remove all status classes
+            item.classList.remove('pending', 'active', 'completed');
+
+            // Set appropriate status
+            if (index < currentIndex) {
+                // Completed actions
+                item.classList.add('completed');
+                item.querySelector('.action-progress-icon').innerHTML =
+                    '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor"/></svg>';
+            } else if (action === currentAction) {
+                // Current action
+                item.classList.add('active');
+                item.querySelector('.action-progress-icon').innerHTML =
+                    '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5" fill="currentColor"/></svg>';
+            } else {
+                // Pending actions
+                item.classList.add('pending');
+                item.querySelector('.action-progress-icon').innerHTML =
+                    '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>';
+            }
+        });
+    }
+
     // === 🎯 PEAK FRAME TRACKING METHODS ===
     /**
      * Reset all examination data for a fresh start
@@ -149,11 +237,11 @@ export class LiveVideoAnalysisController {
                 case FacialActions.EyeClosure:
                     return this.pickBestEyeClosureFrame(currentLandmarks, baselineLandmarks);
                 case FacialActions.Snarl:
-                    // Generic movement detection for snarl for now
-                    return this.calculateGenericMovement(currentLandmarks, baselineLandmarks);
+                    // Specific snarl calculation focusing on nose and upper lip
+                    return this.pickBestSnarlFrame(currentLandmarks, baselineLandmarks);
                 case FacialActions.LipPucker:
-                    // Generic movement detection for lip pucker for now
-                    return this.calculateGenericMovement(currentLandmarks, baselineLandmarks);
+                    // Specific lip pucker calculation focusing on lip protrusion
+                    return this.pickBestLipPuckerFrame(currentLandmarks, baselineLandmarks);
                 case FacialActions.neutral:
                 default:
                     return 0;
@@ -161,6 +249,156 @@ export class LiveVideoAnalysisController {
         }
         catch (error) {
             return 0;
+        }
+    }
+
+    /**
+     * Calculate snarl movement using specific nose and upper lip landmarks
+     * 
+     * SNARL ANATOMY:
+     * - Primary muscle: Levator labii superioris alaeque nasi
+     * - Action: Wrinkles nose upward, raises upper lip, flares nostrils
+     * 
+     * MEASUREMENT APPROACH:
+     * 1. Nose Wrinkle (50% weight) - Vertical movement of nose bridge
+     * 2. Upper Lip Elevation (30% weight) - Upward movement of upper lip
+     * 3. Nostril Flare (20% weight) - Horizontal widening of nostrils
+     */
+    pickBestSnarlFrame(currentLandmarks, baselineLandmarks) {
+        try {
+            // ===== 1. NOSE WRINKLE CALCULATION =====
+            // When snarling, the nose bridge (landmark 6) moves upward
+            // We measure the vertical (y-axis) displacement
+            const noseBridgeCurrent = currentLandmarks[6];
+            const noseBridgeBaseline = baselineLandmarks[6];
+
+            // Calculate vertical movement (negative y = upward in screen coordinates)
+            // Smaller y value = higher position = more nose wrinkle
+            const noseWrinkle = Math.abs(noseBridgeBaseline.y - noseBridgeCurrent.y);
+
+            // ===== 2. UPPER LIP ELEVATION CALCULATION =====
+            // The upper lip center (landmark 0) raises during snarl
+            // This is the most visible part of the snarl movement
+            const upperLipCurrent = currentLandmarks[0];
+            const upperLipBaseline = baselineLandmarks[0];
+
+            // Calculate vertical movement of upper lip
+            const lipElevation = Math.abs(upperLipBaseline.y - upperLipCurrent.y);
+
+            // ===== 3. NOSTRIL FLARE CALCULATION =====
+            // Nostrils (landmarks 98 and 327) widen horizontally during snarl
+            // We measure the increase in distance between left and right nostrils
+            const leftNostrilCurrent = currentLandmarks[98];
+            const rightNostrilCurrent = currentLandmarks[327];
+            const leftNostrilBaseline = baselineLandmarks[98];
+            const rightNostrilBaseline = baselineLandmarks[327];
+
+            // Calculate nostril width in current frame
+            const nostrilWidthCurrent = LandmarkUtils.distance3D(
+                leftNostrilCurrent,
+                rightNostrilCurrent
+            );
+
+            // Calculate nostril width in baseline (neutral) frame
+            const nostrilWidthBaseline = LandmarkUtils.distance3D(
+                leftNostrilBaseline,
+                rightNostrilBaseline
+            );
+
+            // Flare = increase in width (positive value = nostrils wider)
+            const nostrilFlare = Math.max(0, nostrilWidthCurrent - nostrilWidthBaseline);
+
+            // ===== 4. WEIGHTED COMBINATION =====
+            // Combine the three measurements with clinical weighting:
+            // - Nose wrinkle: 50% (most characteristic of snarl)
+            // - Lip elevation: 30% (secondary indicator)
+            // - Nostril flare: 20% (supporting indicator)
+            const snarlScore = (noseWrinkle * 0.5) +
+                (lipElevation * 0.3) +
+                (nostrilFlare * 0.2);
+
+            console.log(`🔬 Snarl peak score: ${snarlScore.toFixed(4)} (Nose:${noseWrinkle.toFixed(4)}, Lip:${lipElevation.toFixed(4)}, Flare:${nostrilFlare.toFixed(4)})`);
+
+            // ===== 5. SCALE FOR PEAK DETECTION =====
+            // Multiply by 1000 to get values in a good range for peak comparison
+            // Typical snarl movements are small (0.01-0.05 in normalized coords)
+            // Scaling to 10-50 range makes peak detection more reliable
+            return snarlScore * 1000;
+
+        } catch (error) {
+            console.warn('🔬 Snarl calculation failed, using generic:', error);
+            // Fallback to generic movement if specific calculation fails
+            return this.calculateGenericMovement(currentLandmarks, baselineLandmarks);
+        }
+    }
+
+    /**
+     * Calculate lip pucker movement using lip landmarks
+     * 
+     * LIP PUCKER ANATOMY:
+     * - Primary muscle: Orbicularis oris
+     * - Action: Protrudes lips forward, brings corners together
+     * 
+     * MEASUREMENT APPROACH:
+     * 1. Lip Protrusion (60% weight) - Forward movement (z-axis)
+     * 2. Corner Convergence (40% weight) - Horizontal narrowing
+     */
+    pickBestLipPuckerFrame(currentLandmarks, baselineLandmarks) {
+        try {
+            // ===== 1. LIP PROTRUSION CALCULATION =====
+            // During pucker, lips move forward (positive z-axis)
+            // We measure the center of upper and lower lips
+            const upperLipCurrent = currentLandmarks[13];  // Upper lip center
+            const lowerLipCurrent = currentLandmarks[14];  // Lower lip center
+            const upperLipBaseline = baselineLandmarks[13];
+            const lowerLipBaseline = baselineLandmarks[14];
+
+            // Calculate forward movement (z-axis) for both lips
+            // Larger z value = more forward = more pucker
+            const upperProtrusion = Math.abs(upperLipCurrent.z - upperLipBaseline.z);
+            const lowerProtrusion = Math.abs(lowerLipCurrent.z - lowerLipBaseline.z);
+
+            // Average protrusion of upper and lower lips
+            const lipProtrusion = (upperProtrusion + lowerProtrusion) / 2;
+
+            // ===== 2. LIP CORNER CONVERGENCE CALCULATION =====
+            // During pucker, lip corners (61 and 291) move closer together
+            // We measure the decrease in distance between corners
+            const leftCornerCurrent = currentLandmarks[61];
+            const rightCornerCurrent = currentLandmarks[291];
+            const leftCornerBaseline = baselineLandmarks[61];
+            const rightCornerBaseline = baselineLandmarks[291];
+
+            // Calculate lip width in current frame
+            const lipWidthCurrent = LandmarkUtils.distance3D(
+                leftCornerCurrent,
+                rightCornerCurrent
+            );
+
+            // Calculate lip width in baseline frame
+            const lipWidthBaseline = LandmarkUtils.distance3D(
+                leftCornerBaseline,
+                rightCornerBaseline
+            );
+
+            // Convergence = decrease in width (positive value = lips narrower)
+            const cornerConvergence = Math.max(0, lipWidthBaseline - lipWidthCurrent);
+
+            // ===== 3. WEIGHTED COMBINATION =====
+            // Combine measurements with clinical weighting:
+            // - Lip protrusion: 60% (primary indicator of pucker)
+            // - Corner convergence: 40% (secondary indicator)
+            const puckerScore = (lipProtrusion * 0.6) +
+                (cornerConvergence * 0.4);
+
+            console.log(`🔬 Lip pucker peak score: ${puckerScore.toFixed(4)} (Protrusion:${lipProtrusion.toFixed(4)}, Convergence:${cornerConvergence.toFixed(4)})`);
+
+            // ===== 4. SCALE FOR PEAK DETECTION =====
+            return puckerScore * 1000;
+
+        } catch (error) {
+            console.warn('🔬 Lip pucker calculation failed, using generic:', error);
+            return this.calculateGenericMovement(currentLandmarks, baselineLandmarks);
         }
     }
 
@@ -769,7 +1007,13 @@ export class LiveVideoAnalysisController {
         const nextBtn = document.getElementById('nextBtn');
         const finishBtn = document.getElementById('finishBtn');
 
-        if (this.examOrchestrator.isExamCompleted()) {
+        // Check if this is the last action
+        const currentSession = this.examOrchestrator.getCurrentSession();
+        const isLastAction = currentSession &&
+            currentSession.currentActionIndex === (currentSession.actions.length - 1);
+
+        // Show finish button if exam is completed OR if we're on the last action
+        if (this.examOrchestrator.isExamCompleted() || isLastAction) {
             if (nextBtn) {
                 nextBtn.style.display = 'none';
             }
@@ -999,11 +1243,13 @@ export class LiveVideoAnalysisController {
             baseline: this.landmarkStorage.get(FacialActions.neutral)?.peakFrame || [],
             eyebrowRaise: this.landmarkStorage.get(FacialActions.EyebrowRaise)?.peakFrame || [],
             eyeClose: this.landmarkStorage.get(FacialActions.EyeClosure)?.peakFrame || [],
-            smile: this.landmarkStorage.get(FacialActions.Smile)?.peakFrame || []
+            smile: this.landmarkStorage.get(FacialActions.Smile)?.peakFrame || [],
+            snarl: this.landmarkStorage.get(FacialActions.Snarl)?.peakFrame || [],
+            lipPucker: this.landmarkStorage.get(FacialActions.LipPucker)?.peakFrame || []
         };
         // Validate all landmark data before proceeding
         const validationErrors = [];
-        const requiredActions = ['baseline', 'eyebrowRaise', 'eyeClose', 'smile'];
+        const requiredActions = ['baseline', 'eyebrowRaise', 'eyeClose', 'smile', 'snarl', 'lipPucker'];
         const expectedLandmarkCounts = [468, 478]; // Support both MediaPipe v1 and v2
         for (const action of requiredActions) {
             const landmarks = realLandmarkData[action];
@@ -1134,6 +1380,8 @@ export class LiveVideoAnalysisController {
         }
         // Update button states based on current action
         this.updateButtonStates();
+        // Update actions progress tracker
+        this.updateActionsProgress();
     }
     displayInstruction(instruction, actionName) {
         // Prevent further instructions after exam is completed
@@ -1250,7 +1498,12 @@ export class LiveVideoAnalysisController {
             }
         }
         // Update finish button state (only for final action)
-        if (finishBtn && (actionType === 'smile' || this.examOrchestrator.isExamCompleted())) {
+        // Check if this is the last action in the sequence
+        const currentSession = this.examOrchestrator.getCurrentSession();
+        const isLastAction = currentSession &&
+            currentSession.currentActionIndex === (currentSession.actions.length - 1);
+
+        if (finishBtn && (isLastAction || this.examOrchestrator.isExamCompleted())) {
             const allDetected = this.movementDetectionService.areAllMovementsDetected();
             if (allDetected) {
                 finishBtn.disabled = false;
@@ -1307,6 +1560,30 @@ export class LiveVideoAnalysisController {
         }
         catch (error) {
             console.error('❌ CRITICAL: Failed to store results for results route:', error);
+
+            // Fallback: Try to store without images if quota exceeded
+            if (error.name === 'QuotaExceededError' || error.message.includes('quota')) {
+                console.warn('⚠️ Storage quota exceeded. Attempting to store results without images.');
+                try {
+                    // Create a copy of results without images
+                    const resultsWithoutImages = JSON.parse(JSON.stringify(this.examResults));
+                    if (resultsWithoutImages.peakFrameImages) {
+                        resultsWithoutImages.peakFrameImages = {};
+                    }
+                    // Also clear raw landmark data images if any (though they shouldn't be there)
+
+                    const fallbackData = {
+                        complete_analysis_results: resultsWithoutImages,
+                        timestamp: new Date().toISOString(),
+                        expiryTime: new Date(Date.now() + (24 * 60 * 60 * 1000)).toISOString(),
+                        warning: 'Images excluded due to storage limits'
+                    };
+                    localStorage.setItem('facialSymmetryResults', JSON.stringify(fallbackData));
+                    return fallbackData;
+                } catch (fallbackError) {
+                    console.error('❌ CRITICAL: Failed to store fallback results:', fallbackError);
+                }
+            }
             return null;
         }
     }

@@ -30,6 +30,8 @@ export class ClinicalIntegrationService {
             eyebrow_raise: this.convertToLandmarks(landmarkData.eyebrowRaise),
             eye_close: this.convertToLandmarks(landmarkData.eyeClose),
             smile: this.convertToLandmarks(landmarkData.smile),
+            snarl: this.convertToLandmarks(landmarkData.snarl),
+            lip_pucker: this.convertToLandmarks(landmarkData.lipPucker)
         };
     }
     /**

@@ -81,6 +81,8 @@ export class SpeechService {
             [FacialActions.EyebrowRaise]: 'Please raise both eyebrows as high as possible',
             [FacialActions.EyeClosure]: 'Please close your eyes tightly',
             [FacialActions.Smile]: 'Please show your biggest smile',
+            [FacialActions.Snarl]: 'Wrinkle your nose upward and show your upper teeth',
+            [FacialActions.LipPucker]: 'Pucker your lips tightly as if giving a kiss',
         };
         // Try direct enum match first
         let speechCommand = quickCommands[action];

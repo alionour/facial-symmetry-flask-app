@@ -69,153 +69,226 @@
         </div>
     </div>
 
-    <!-- Capture Controls -->
-    <div class="capture-controls" style="text-align: center; margin: 20px;">
-        <button id="captureBtn" class="nav-btn primary" onclick="captureCurrentAction()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z"
-                    fill="currentColor" />
-            </svg>
-            {{ _('Capture') }}
-        </button>
-        <button id="nextActionBtn" class="nav-btn" onclick="nextAction()" style="display: none;">
-            {{ _('Next Action') }}
-        </button>
-    </div>
+        <!-- Capture Controls -->
 
-    <!-- Progress Indicator -->
-    <div class="progress-section" style="max-width: 600px; margin: 20px auto;">
-        <div class="progress-items">
-            <div class="progress-item" data-action="NEUTRAL">
-                <div class="progress-icon">1</div>
-                <span>{{ _('Neutral') }}</span>
-            </div>
-            <div class="progress-item" data-action="EYEBROW_RAISE">
-                <div class="progress-icon">2</div>
-                <span>{{ _('Eyebrow Raise') }}</span>
-            </div>
-            <div class="progress-item" data-action="EYE_CLOSE">
-                <div class="progress-icon">3</div>
-                <span>{{ _('Eye Close') }}</span>
-            </div>
-            <div class="progress-item" data-action="SMILE">
-                <div class="progress-icon">4</div>
-                <span>{{ _('Smile') }}</span>
-            </div>
+        <div class="capture-controls" style="text-align: center; margin: 20px;">
+
+            <button id="captureBtn" class="nav-btn primary" onclick="captureCurrentAction()">
+
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+                    <path
+
+                        d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z"
+
+                        fill="currentColor" />
+
+                </svg>
+
+                {{ _('Capture') }}
+
+            </button>
+
         </div>
+
+    
+
+        <!-- Action Selection -->
+
+        <div class="action-selection" style="text-align: center; margin: 20px;">
+
+            <button class="nav-btn" onclick="selectAction(0)">{{ _('Neutral') }}</button>
+
+            <button class="nav-btn" onclick="selectAction(1)">{{ _('Eyebrow Raise') }}</button>
+
+            <button class="nav-btn" onclick="selectAction(2)">{{ _('Eye Close') }}</button>
+
+            <button class="nav-btn" onclick="selectAction(3)">{{ _('Smile') }}</button>
+
+            <button class="nav-btn" onclick="selectAction(4)">{{ _('Snarl') }}</button>
+
+            <button class="nav-btn" onclick="selectAction(5)">{{ _('Lip Pucker') }}</button>
+
+        </div>
+
     </div>
-</div>
-{% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
-<script src="{{ url_for('static', filename='js/canvas-drawing.js') }}"></script>
-<script>
-    // Live Video Analysis Controller
-    const ACTIONS = ['NEUTRAL', 'EYEBROW_RAISE', 'EYE_CLOSE', 'SMILE'];
-    const INSTRUCTIONS = {
-        'NEUTRAL': '{{ _("Please relax your face and maintain a neutral expression") }}',
-        'EYEBROW_RAISE': '{{ _("Please raise your eyebrows as high as possible.") }}',
-        'EYE_CLOSE': '{{ _("Please close your eyes tightly.") }}',
-        'SMILE': '{{ _("Please smile broadly showing your teeth.") }}'
-    };
+    {% endblock %}
 
-    let currentActionIndex = 0;
-    let cameraManager = null;
-    let canvasDrawer = null;
-    let capturedActions = new Set();
+    
 
-    // Initialize camera and canvas
-    async function initializeApp() {
-        cameraManager = new CameraManager();
-        canvasDrawer = new CanvasDrawer('analysisCanvas');
+    {% block scripts %}
 
-        const success = await cameraManager.initialize('video');
-        if (success) {
-            updateCurrentAction();
+    <script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/canvas-drawing.js') }}"></script>
+
+    <script>
+
+        // Live Video Analysis Controller
+
+        const ACTIONS = ['NEUTRAL', 'EYEBROW_RAISE', 'EYE_CLOSE', 'SMILE', 'SNARL', 'LIP_PUCKER'];
+
+        const INSTRUCTIONS = {
+
+            'NEUTRAL': '{{ _("Please relax your face and maintain a neutral expression") }}',
+
+            'EYEBROW_RAISE': '{{ _("Please raise your eyebrows as high as possible.") }}',
+
+            'EYE_CLOSE': '{{ _("Please close your eyes tightly.") }}',
+
+            'SMILE': '{{ _("Please smile broadly showing your teeth.") }}',
+
+            'SNARL': '{{ _("Please raise your upper lip as if to snarl.") }}',
+
+            'LIP_PUCKER': '{{ _("Please pucker your lips as tightly as possible.") }}'
+
+        };
+
+    
+
+        let currentActionIndex = 0;
+
+        let cameraManager = null;
+
+        let canvasDrawer = null;
+
+        let capturedActions = new Set();
+
+    
+
+        // Initialize camera and canvas
+
+        async function initializeApp() {
+
+            cameraManager = new CameraManager();
+
+            canvasDrawer = new CanvasDrawer('analysisCanvas');
+
+    
+
+            const success = await cameraManager.initialize('video');
+
+            if (success) {
+
+                updateCurrentAction();
+
+            }
+
         }
-    }
 
-    function updateCurrentAction() {
-        const action = ACTIONS[currentActionIndex];
-        const instruction = INSTRUCTIONS[action];
+    
 
-        document.getElementById('actionTitle').textContent = action.replace('_', ' ');
-        document.getElementById('actionInstruction').textContent = instruction;
+        function updateCurrentAction() {
 
-        // Update progress indicators
-        document.querySelectorAll('.progress-item').forEach((item, index) => {
-            if (index < currentActionIndex) {
-                item.classList.add('completed');
-            } else if (index === currentActionIndex) {
-                item.classList.add('active');
+            const action = ACTIONS[currentActionIndex];
+
+            const instruction = INSTRUCTIONS[action];
+
+    
+
+            document.getElementById('actionTitle').textContent = action.replace('_', ' ');
+
+            document.getElementById('actionInstruction').textContent = instruction;
+
+        }
+
+    
+
+        function selectAction(index) {
+
+            currentActionIndex = index;
+
+            updateCurrentAction();
+
+        }
+
+    
+
+        async function captureCurrentAction() {
+
+            const action = ACTIONS[currentActionIndex];
+
+            const frameData = cameraManager.captureFrame();
+
+    
+
+            if (!frameData) {
+
+                alert('{{ _("Failed to capture frame") }}');
+
+                return;
+
+            }
+
+    
+
+            document.getElementById('captureBtn').disabled = true;
+
+            document.getElementById('captureBtn').textContent = '{{ _("Processing...") }}';
+
+    
+
+            const csrfToken = '{{ csrf_token() }}';
+
+    
+
+            const result = await cameraManager.submitFrame(action, frameData, csrfToken);
+
+    
+
+            if (result.success) {
+
+                capturedActions.add(action);
+
+    
+
+                if (result.landmarks) {
+
+                    canvasDrawer.drawImage(frameData);
+
+                    setTimeout(() => {
+
+                        canvasDrawer.drawLandmarks(result.landmarks, cameraManager.video.videoWidth, cameraManager.video.videoHeight);
+
+                        canvasDrawer.drawSymmetryLine(cameraManager.video.videoWidth, cameraManager.video.videoHeight);
+
+                    }, 100);
+
+                }
+
+    
+
+                document.getElementById('captureBtn').disabled = false;
+
+                document.getElementById('captureBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z" fill="currentColor"/></svg> {{ _("Capture") }}';
+
+    
+
+                if (capturedActions.size === ACTIONS.length) {
+
+                    document.getElementById('finishBtn').style.display = 'inline-flex';
+
+                }
+
             } else {
-                item.classList.remove('completed', 'active');
-            }
-        });
-    }
 
-    async function captureCurrentAction() {
-        const action = ACTIONS[currentActionIndex];
-        const frameData = cameraManager.captureFrame();
+                alert(result.error || '{{ _("Error processing frame") }}');
 
-        if (!frameData) {
-            alert('{{ _("Failed to capture frame") }}');
-            return;
-        }
+                document.getElementById('captureBtn').disabled = false;
 
-        // Show loading state
-        document.getElementById('captureBtn').disabled = true;
-        document.getElementById('captureBtn').textContent = '{{ _("Processing...") }}';
+                document.getElementById('captureBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z" fill="currentColor"/></svg> {{ _("Capture") }}';
 
-        // Get CSRF token
-        const csrfToken = '{{ csrf_token() }}';
-
-        // Submit frame to server
-        const result = await cameraManager.submitFrame(action, frameData, csrfToken);
-
-        if (result.success) {
-            capturedActions.add(action);
-
-            // Draw landmarks on canvas
-            if (result.landmarks) {
-                canvasDrawer.drawImage(frameData);
-                setTimeout(() => {
-                    canvasDrawer.drawLandmarks(result.landmarks, cameraManager.video.videoWidth, cameraManager.video.videoHeight);
-                    canvasDrawer.drawSymmetryLine(cameraManager.video.videoWidth, cameraManager.video.videoHeight);
-                }, 100);
             }
 
-            // Show next action button
-            document.getElementById('captureBtn').style.display = 'none';
-            document.getElementById('nextActionBtn').style.display = 'inline-flex';
-        } else {
-            alert(result.error || '{{ _("Error processing frame") }}');
-            document.getElementById('captureBtn').disabled = false;
-            document.getElementById('captureBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z" fill="currentColor"/></svg> {{ _("Capture") }}';
         }
-    }
 
-    function nextAction() {
-        currentActionIndex++;
+    
 
-        if (currentActionIndex < ACTIONS.length) {
-            // Move to next action
-            updateCurrentAction();
-            document.getElementById('captureBtn').style.display = 'inline-flex';
-            document.getElementById('captureBtn').disabled = false;
-            document.getElementById('captureBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z" fill="currentColor"/></svg> {{ _("Capture") }}';
-            document.getElementById('nextActionBtn').style.display = 'none';
-            canvasDrawer.clear();
-        } else {
-            // All actions completed, show finish button
-            document.getElementById('nextActionBtn').style.display = 'none';
-            document.getElementById('finishBtn').style.display = 'inline-flex';
-        }
-    }
+        document.addEventListener('DOMContentLoaded', initializeApp);
 
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', initializeApp);
-</script>
-{% endblock %}
+    </script>
+
+    {% endblock %}
+
+    

@@ -6,7 +6,9 @@ export class ExamActionsConfig {
             FacialActions.neutral,
             FacialActions.EyebrowRaise,
             FacialActions.EyeClosure,
-            FacialActions.Smile
+            FacialActions.Smile,
+            FacialActions.Snarl,
+            FacialActions.LipPucker
         ];
     }
 }

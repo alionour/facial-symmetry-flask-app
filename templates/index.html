@@ -59,7 +59,9 @@
 
 
   <!-- metrics now inside resultsView -->
-  <script>
+  <script type="module">
+    import { initializeFacialSymmetryApp } from '{{ url_for('static', filename='js/main.js') }}';
+
     // Clean SPA router: root route ('/') serves home, #/exam and #/results for other views
     // SPA router: loads partials into #routeContainer
     async function loadRoute(route) {
@@ -71,7 +73,6 @@
 
       let file = '';
       if (route === '') {
-        // Root route serves home content directly
         file = 'pages/home.html';
       } else if (route === 'live-video-analysis') {
         file = 'pages/live-video-analysis.html';
@@ -80,7 +81,6 @@
       } else if (route === 'image-assessment') {
         file = 'pages/image-assessment.html';
       } else {
-        // Unknown routes redirect to root (home)
         console.log(`Unknown route '${route}', redirecting to home`);
         window.location.hash = '';
         return;
@@ -97,6 +97,9 @@
         const html = await resp.text();
         container.innerHTML = html;
 
+        // Initialize the app now that the DOM is ready
+        initializeFacialSymmetryApp();
+
         // Execute any script tags in the loaded content
         if (route === 'image-assessment') {
           executeScriptsInContainer(container);
@@ -104,30 +107,14 @@
 
         showInstructionsCard(route === 'live-video-analysis');
 
-        // Fire custom events after views are loaded with mobile-specific delays
+        // Fire custom events after views are loaded
         if (route === 'live-video-analysis') {
-          // Longer delay for mobile devices to ensure DOM is ready
-          const delay = /Mobi|Android/i.test(navigator.userAgent) ? 200 : 50;
-          setTimeout(() => {
-            console.log('Dispatching liveVideoAnalysisViewLoaded event');
-            window.dispatchEvent(new Event('liveVideoAnalysisViewLoaded'));
-          }, delay);
+          window.dispatchEvent(new Event('liveVideoAnalysisViewLoaded'));
         } else if (route === 'results') {
-          // Even longer delay for results on mobile due to complexity
-          const delay = /Mobi|Android/i.test(navigator.userAgent) ? 300 : 100;
-          setTimeout(() => {
-            console.log('Dispatching resultsViewLoaded event');
-            window.dispatchEvent(new Event('resultsViewLoaded'));
-          }, delay);
+          window.dispatchEvent(new Event('resultsViewLoaded'));
         } else if (route === 'image-assessment') {
-          // Delay for image assessment view
-          const delay = /Mobi|Android/i.test(navigator.userAgent) ? 200 : 50;
-          setTimeout(() => {
-            console.log('Dispatching imageAssessmentViewLoaded event');
-            window.dispatchEvent(new Event('imageAssessmentViewLoaded'));
-            // Load and initialize the image assessment module
-            loadImageAssessmentModule();
-          }, delay);
+          window.dispatchEvent(new Event('imageAssessmentViewLoaded'));
+          loadImageAssessmentModule();
         }
 
         console.log(`Successfully loaded route: ${route}`);
@@ -157,8 +144,8 @@
         `;
       }
     }
+
     function handleRouteChange() {
-      // Use pathname for clean routing
       let route = window.location.pathname.replace(/^\//, '');
       if (route === '') route = '';
       else if (route === 'live-video-analysis') route = 'live-video-analysis';
@@ -169,153 +156,14 @@
       loadRoute(route);
     }
 
-    // Function to load and initialize the image assessment module
-    async function loadImageAssessmentModule() {
-      console.log('Loading image assessment module...');
-
-      try {
-        // Import the image assessment module
-        const module = await import('./ImageAssessmentModule.js');
-
-        // Initialize the image assessment functionality
-        module.initializeImageAssessment();
-
-        console.log('Image assessment module loaded and initialized successfully');
-
-      } catch (error) {
-        console.error('Error loading image assessment module:', error);
-
-        // Fallback: Define basic functions to prevent errors
-        window.handleImageUpload = function(action, input) {
-          console.log('Fallback handleImageUpload called:', action);
-          alert('Image upload functionality is not available. Please refresh the page and try again.');
-        };
-
-        window.retakeImage = function(action) {
-          console.log('Fallback retakeImage called:', action);
-        };
-
-        window.startImageAnalysis = function() {
-          console.log('Fallback startImageAnalysis called');
-          window.history.pushState({}, '', '/results');
-          window.dispatchEvent(new Event('popstate'));
-        };
-
-        window.goBackToHome = function() {
-          console.log('Fallback goBackToHome called');
-          window.history.pushState({}, '', '/');
-          window.dispatchEvent(new Event('popstate'));
-        };
-      }
-    }
-
-    // Function to execute script tags in a container
-    function executeScriptsInContainer(container) {
-      console.log('Executing scripts in container...');
-
-      const scripts = container.querySelectorAll('script');
-      scripts.forEach(script => {
-        try {
-          console.log('Executing script tag...');
-          const newScript = document.createElement('script');
-          newScript.textContent = script.textContent;
-          document.head.appendChild(newScript);
-          document.head.removeChild(newScript);
-        } catch (error) {
-          console.error('Error executing script:', error);
-        }
-      });
-    }
-
-    // Define image assessment functions globally to ensure they're always available
-    window.handleImageUpload = function(action, input) {
-      console.log('handleImageUpload called:', action, input);
-      if (input.files && input.files[0]) {
-        if (window.imageManager && window.imageManager.processFile) {
-          window.imageManager.processFile(input.files[0], action);
-        } else {
-          console.log('Image manager not ready, storing file for later processing');
-          // Store the file for later processing
-          if (!window.pendingUploads) window.pendingUploads = [];
-          window.pendingUploads.push({ action, file: input.files[0] });
-        }
-      }
-    };
-
-    window.retakeImage = function(action) {
-      console.log('retakeImage called:', action);
-      if (window.imageManager && window.imageManager.retakeImage) {
-        window.imageManager.retakeImage(action);
-      }
-    };
-
-    window.startImageAnalysis = function() {
-      console.log('startImageAnalysis called');
-      if (window.imageManager && window.imageManager.startAnalysis) {
-        window.imageManager.startAnalysis();
-      } else {
-        // Fallback: navigate to results
-        window.history.pushState({}, '', '/results');
-        window.dispatchEvent(new Event('popstate'));
-      }
-    };
-
-    window.goBackToHome = function() {
-      console.log('goBackToHome called');
-      window.history.pushState({}, '', '/');
-      window.dispatchEvent(new Event('popstate'));
-    };
-
-    console.log('Global image assessment functions defined');
-
-    // Add mobile-specific error handling
-    window.addEventListener('error', (e) => {
-      console.error('Global error caught:', e.error, e.filename, e.lineno);
-      if (/Mobi|Android/i.test(navigator.userAgent)) {
-        console.log('Mobile device detected, error details:', {
-          message: e.message,
-          filename: e.filename,
-          lineno: e.lineno,
-          colno: e.colno,
-          error: e.error
-        });
-      }
-    });
-
-    window.addEventListener('unhandledrejection', (e) => {
-      console.error('Unhandled promise rejection:', e.reason);
-      if (/Mobi|Android/i.test(navigator.userAgent)) {
-        console.log('Mobile device promise rejection:', e.reason);
-      }
-    });
-
     window.addEventListener('popstate', handleRouteChange);
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOM Content Loaded, initializing router');
-      handleRouteChange();
+        console.log('DOM Content Loaded, initializing router');
+        handleRouteChange();
     });
+    // ... (rest of the script)
   </script>
   <!-- Main application -->
-  <script>
-    // Debug: Log when DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('[DEBUG] DOMContentLoaded');
-      const video = document.getElementById('video');
-      if (video) {
-        console.log('[DEBUG] Video element found:', video);
-      } else {
-        console.error('[DEBUG] Video element NOT found');
-      }
-    });
-    // Debug: Log when window is loaded
-    window.addEventListener('load', () => {
-      console.log('[DEBUG] Window loaded');
-      const video = document.getElementById('video');
-      if (video) {
-        console.log('[DEBUG] Video element on window load:', video);
-      }
-    });
-  </script>
   <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
