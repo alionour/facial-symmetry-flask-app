@@ -1,0 +1,156 @@
+≡ادز Starting Sunnybrook Scoring Tests...
+
+Test 1: Zero Movement (Paralysis Simulation)
+Result 1: {
+  "compositeScore": 20,
+  "restingScore": {
+    "value": 0,
+    "details": {
+      "eye": 0,
+      "cheek": 0,
+      "mouth": 0,
+      "totalRaw": 0,
+      "weightedScore": 0
+    }
+  },
+  "voluntaryScore": {
+    "value": 20,
+    "details": {
+      "eyebrowRaise": 1,
+      "eyeClosure": 1,
+      "smile": 1,
+      "snarl": 1,
+      "lipPucker": 1,
+      "totalRaw": 5,
+      "weightedScore": 20
+    }
+  },
+  "synkinesisScore": {
+    "value": 0,
+    "details": {
+      "eyebrowRaise": 0,
+      "eyeClosure": 0,
+      "smile": 0,
+      "snarl": 0,
+      "lipPucker": 0,
+      "totalRaw": 0,
+      "weightedScore": 0
+    }
+  },
+  "affectedSide": "Right",
+  "details": {
+    "resting": {
+      "eye": 0,
+      "cheek": 0,
+      "mouth": 0,
+      "totalRaw": 0,
+      "weightedScore": 0
+    },
+    "voluntary": {
+      "eyebrowRaise": 1,
+      "eyeClosure": 1,
+      "smile": 1,
+      "snarl": 1,
+      "lipPucker": 1,
+      "totalRaw": 5,
+      "weightedScore": 20
+    },
+    "synkinesis": {
+      "eyebrowRaise": 0,
+      "eyeClosure": 0,
+      "smile": 0,
+      "snarl": 0,
+      "lipPucker": 0,
+      "totalRaw": 0,
+      "weightedScore": 0
+    }
+  }
+}
+ظ£à Test 1 Passed: Score is 20 (Base for no movement)
+
+Test 2: Normal Movement
+Result 2: {
+  "compositeScore": 5,
+  "restingScore": {
+    "value": 15,
+    "details": {
+      "eye": 1,
+      "cheek": 1,
+      "mouth": 1,
+      "totalRaw": 3,
+      "weightedScore": 15
+    }
+  },
+  "voluntaryScore": {
+    "value": 20,
+    "details": {
+      "eyebrowRaise": 1,
+      "eyeClosure": 1,
+      "smile": 1,
+      "snarl": 1,
+      "lipPucker": 1,
+      "totalRaw": 5,
+      "weightedScore": 20
+    }
+  },
+  "synkinesisScore": {
+    "value": 0,
+    "details": {
+      "eyebrowRaise": 0,
+      "eyeClosure": 0,
+      "smile": 0,
+      "snarl": 0,
+      "lipPucker": 0,
+      "totalRaw": 0,
+      "weightedScore": 0
+    }
+  },
+  "affectedSide": "Right",
+  "details": {
+    "resting": {
+      "eye": 1,
+      "cheek": 1,
+      "mouth": 1,
+      "totalRaw": 3,
+      "weightedScore": 15
+    },
+    "voluntary": {
+      "eyebrowRaise": 1,
+      "eyeClosure": 1,
+      "smile": 1,
+      "snarl": 1,
+      "lipPucker": 1,
+      "totalRaw": 5,
+      "weightedScore": 20
+    },
+    "synkinesis": {
+      "eyebrowRaise": 0,
+      "eyeClosure": 0,
+      "smile": 0,
+      "snarl": 0,
+      "lipPucker": 0,
+      "totalRaw": 0,
+      "weightedScore": 0
+    }
+  }
+}
+
+Test 3: Synkinesis (Eye closure during Smile)
+ظإî Test 2 Failed: Expected >80, got 20
+ظإî Test 3 Failed: Synkinesis not detected
+Result 3: {
+  "value": 0,
+  "details": {
+    "eyebrowRaise": 0,
+    "eyeClosure": 0,
+    "smile": 0,
+    "snarl": 0,
+    "lipPucker": 0,
+    "totalRaw": 0,
+    "weightedScore": 0
+  }
+}
+(node:28460) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///F:/Ali/Projects/alionour33/test/web_browser/flask_app/test_sunnybrook.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to F:\Ali\Projects\alionour33\test\web_browser\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)

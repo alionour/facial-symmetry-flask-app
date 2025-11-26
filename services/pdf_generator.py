@@ -43,17 +43,85 @@ def generate_pdf(analysis_data):
     pdf.set_font('Arial', '', 12)
 
     results = analysis_data.get('analysisResult', {})
+    
+    # Extract Sunnybrook data if present
+    sunnybrook = results.pop('sunnybrookScore', None)
+
+    # 1. Standard Symmetry Analysis
     for action, metrics in results.items():
+        if action == 'symmetryMetrics': continue # Skip raw symmetry metrics if they are just numbers
+        
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(0, 10, action.replace('_', ' ').title(), 0, 1)
         pdf.set_font('Arial', '', 12)
-        for metric, value in metrics.items():
-            if isinstance(value, dict):
-                for sub_metric, sub_value in value.items():
-                    pdf.cell(0, 10, f"  {sub_metric.replace('_', ' ').title()}: {sub_value:.2f}", 0, 1)
-            else:
-                pdf.cell(0, 10, f"  {metric.replace('_', ' ').title()}: {value:.2f}", 0, 1)
+        
+        if isinstance(metrics, dict):
+            for metric, value in metrics.items():
+                if isinstance(value, dict):
+                    for sub_metric, sub_value in value.items():
+                        if isinstance(sub_value, (int, float)):
+                            pdf.cell(0, 10, f"  {sub_metric.replace('_', ' ').title()}: {sub_value:.2f}", 0, 1)
+                elif isinstance(value, (int, float)):
+                    pdf.cell(0, 10, f"  {metric.replace('_', ' ').title()}: {value:.2f}", 0, 1)
         pdf.ln(5)
+
+    # 2. Sunnybrook Facial Grading System
+    if sunnybrook:
+        pdf.add_page()
+        pdf.set_font('Arial', 'B', 14)
+        pdf.cell(0, 10, 'Sunnybrook Facial Grading System', 0, 1)
+        pdf.ln(5)
+
+        # Composite Score
+        composite = sunnybrook.get('compositeScore', 0)
+        affected_side = sunnybrook.get('affectedSide', 'Unknown')
+        
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(0, 10, f"Composite Score: {composite:.0f} / 100", 0, 1)
+        pdf.set_font('Arial', '', 12)
+        pdf.cell(0, 10, f"Affected Side: {affected_side}", 0, 1)
+        pdf.ln(5)
+
+        details = sunnybrook.get('details', {})
+
+        # Resting Symmetry
+        resting = sunnybrook.get('restingScore', {})
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(0, 10, f"Resting Symmetry (Score: {resting.get('value', 0)}/20)", 0, 1)
+        pdf.set_font('Arial', '', 11)
+        if 'resting' in details:
+            r_det = details['resting']
+            pdf.cell(0, 8, f"  Eye (Palpebral Fissure): {r_det.get('eye', 0)}", 0, 1)
+            pdf.cell(0, 8, f"  Cheek (Nasolabial Fold): {r_det.get('cheek', 0)}", 0, 1)
+            pdf.cell(0, 8, f"  Mouth (Corner): {r_det.get('mouth', 0)}", 0, 1)
+        pdf.ln(3)
+
+        # Voluntary Movement
+        voluntary = sunnybrook.get('voluntaryScore', {})
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(0, 10, f"Voluntary Movement (Score: {voluntary.get('value', 0)}/100)", 0, 1)
+        pdf.set_font('Arial', '', 11)
+        if 'voluntary' in details:
+            v_det = details['voluntary']
+            pdf.cell(0, 8, f"  Eyebrow Raise: {v_det.get('eyebrowRaise', 0)}", 0, 1)
+            pdf.cell(0, 8, f"  Eye Closure: {v_det.get('eyeClosure', 0)}", 0, 1)
+            pdf.cell(0, 8, f"  Smile: {v_det.get('smile', 0)}", 0, 1)
+            pdf.cell(0, 8, f"  Snarl: {v_det.get('snarl', 0)}", 0, 1)
+            pdf.cell(0, 8, f"  Lip Pucker: {v_det.get('lipPucker', 0)}", 0, 1)
+        pdf.ln(3)
+
+        # Synkinesis
+        synkinesis = sunnybrook.get('synkinesisScore', {})
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(0, 10, f"Synkinesis (Score: {synkinesis.get('value', 0)}/15)", 0, 1)
+        pdf.set_font('Arial', '', 11)
+        if 'synkinesis' in details:
+            s_det = details['synkinesis']
+            pdf.cell(0, 8, f"  Eyebrow Raise: {s_det.get('eyebrowRaise', 0)}", 0, 1)
+            pdf.cell(0, 8, f"  Eye Closure: {s_det.get('eyeClosure', 0)}", 0, 1)
+            pdf.cell(0, 8, f"  Smile: {s_det.get('smile', 0)}", 0, 1)
+            pdf.cell(0, 8, f"  Snarl: {s_det.get('snarl', 0)}", 0, 1)
+            pdf.cell(0, 8, f"  Lip Pucker: {s_det.get('lipPucker', 0)}", 0, 1)
 
     return pdf.output()
 

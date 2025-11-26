@@ -769,6 +769,14 @@ export class ResultsView {
             ${this.generateOverallSymmetryScoreDisplay(results.analysisResult.symmetryMetrics)}
           </div>
 
+          <!-- Sunnybrook Facial Grading System Score -->
+          <div style="padding: 30px; border-bottom: 1px solid #e1e8ed;">
+            <h2 style="color: #2c3e50; margin-bottom: 20px; font-size: 1.5em;">
+              Sunnybrook Facial Grading System
+            </h2>
+            ${this.generateSunnybrookScoreDisplay(results.analysisResult.sunnybrookScore)}
+          </div>
+
 
 
           <!-- Action Controls -->
@@ -1121,6 +1129,130 @@ export class ResultsView {
       </div>
     `;
   }
+  /**
+   * Generate Sunnybrook Score Display
+   */
+  generateSunnybrookScoreDisplay(sunnybrook) {
+    if (!sunnybrook) return '<div style="padding: 20px; background: #f8f9fa; border-radius: 8px; color: #6c757d;">Sunnybrook score not available.</div>';
+
+    const { compositeScore, restingScore, voluntaryScore, synkinesisScore, affectedSide, details } = sunnybrook;
+
+    // Determine status color based on composite score (0-100)
+    const scoreColor = compositeScore >= 80 ? '#27ae60' : compositeScore >= 50 ? '#f39c12' : '#e74c3c';
+    const scoreStatus = compositeScore >= 80 ? 'Good Function' : compositeScore >= 50 ? 'Moderate Dysfunction' : 'Severe Dysfunction';
+
+    // Helper to generate a row for the details table
+    const detailRow = (label, value, max, isGoodHigh = true) => {
+      // For Voluntary: High is Good. For Resting/Synkinesis: Low is Good.
+      return `
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 0.9em;">
+                <span style="color: #5f6368;">${label}</span>
+                <span style="font-weight: 600; color: #2c3e50;">${value} <span style="color: #9aa0a6; font-weight: normal; font-size: 0.9em;">/ ${max}</span></span>
+            </div>
+        `;
+    };
+
+    return `
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        
+        <!-- Composite Score Card -->
+        <div style="
+          background: white;
+          border-radius: 12px;
+          padding: 25px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          border-left: 6px solid ${scoreColor};
+          text-align: center;
+          grid-column: 1 / -1;
+        ">
+          <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.3em;">Sunnybrook Composite Score</h3>
+          <div style="font-size: 3.5em; font-weight: bold; color: ${scoreColor}; margin: 15px 0;">
+            ${compositeScore.toFixed(0)}
+          </div>
+          <div style="font-size: 1.1em; font-weight: 600; color: #2c3e50; margin-bottom: 15px;">
+            ${scoreStatus}
+          </div>
+          <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; font-size: 0.9em; color: #6c757d;">
+            Affected Side: <strong>${affectedSide}</strong>
+          </div>
+        </div>
+
+        <!-- Breakdown Cards -->
+        
+        <!-- Resting Symmetry -->
+        <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-top: 4px solid #3498db;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h4 style="margin: 0; color: #2c3e50;">Resting Symmetry</h4>
+            <span style="background: #e8f4fd; color: #3498db; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">x 5</span>
+          </div>
+          
+          <div style="margin-bottom: 15px;">
+            ${detailRow('Eye (Palpebral Fissure)', details.resting.eye, 1, false)}
+            ${detailRow('Cheek (Nasolabial Fold)', details.resting.cheek, 1, false)}
+            ${detailRow('Mouth (Corner)', details.resting.mouth, 1, false)}
+          </div>
+
+          <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; text-align: center;">
+             <div style="font-size: 0.85em; color: #7f8c8d; margin-bottom: 4px;">Total Score</div>
+             <div style="font-size: 1.5em; font-weight: bold; color: #3498db;">
+                ${restingScore.value} <span style="font-size: 0.6em; color: #95a5a6; font-weight: normal;">/ 20</span>
+             </div>
+          </div>
+        </div>
+
+        <!-- Voluntary Movement -->
+        <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-top: 4px solid #2ecc71;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h4 style="margin: 0; color: #2c3e50;">Voluntary Movement</h4>
+            <span style="background: #eafaf1; color: #2ecc71; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">x 4</span>
+          </div>
+
+          <div style="margin-bottom: 15px;">
+            ${detailRow('Eyebrow Raise', details.voluntary.eyebrowRaise, 5)}
+            ${detailRow('Eye Closure', details.voluntary.eyeClosure, 5)}
+            ${detailRow('Open Mouth Smile', details.voluntary.smile, 5)}
+            ${detailRow('Snarl', details.voluntary.snarl, 5)}
+            ${detailRow('Lip Pucker', details.voluntary.lipPucker, 5)}
+          </div>
+
+          <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; text-align: center;">
+             <div style="font-size: 0.85em; color: #7f8c8d; margin-bottom: 4px;">Total Score</div>
+             <div style="font-size: 1.5em; font-weight: bold; color: #2ecc71;">
+                ${voluntaryScore.value} <span style="font-size: 0.6em; color: #95a5a6; font-weight: normal;">/ 100</span>
+             </div>
+          </div>
+        </div>
+
+        <!-- Synkinesis -->
+        <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-top: 4px solid #e74c3c;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h4 style="margin: 0; color: #2c3e50;">Synkinesis</h4>
+            <span style="background: #fdedeb; color: #e74c3c; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">x 1</span>
+          </div>
+
+          <div style="margin-bottom: 15px;">
+            ${detailRow('Eyebrow Raise', details.synkinesis.eyebrowRaise, 3, false)}
+            ${detailRow('Eye Closure', details.synkinesis.eyeClosure, 3, false)}
+            ${detailRow('Open Mouth Smile', details.synkinesis.smile, 3, false)}
+            ${detailRow('Snarl', details.synkinesis.snarl, 3, false)}
+            ${detailRow('Lip Pucker', details.synkinesis.lipPucker, 3, false)}
+          </div>
+
+          <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; text-align: center;">
+             <div style="font-size: 0.85em; color: #7f8c8d; margin-bottom: 4px;">Total Score</div>
+             <div style="font-size: 1.5em; font-weight: bold; color: #e74c3c;">
+                ${synkinesisScore.value} <span style="font-size: 0.6em; color: #95a5a6; font-weight: normal;">/ 15</span>
+             </div>
+          </div>
+        </div>
+
+      </div>
+      <div style="margin-top: 15px; font-size: 0.85em; color: #7f8c8d; text-align: center;">
+        Composite Score = Voluntary Movement - Resting Symmetry - Synkinesis
+      </div>
+    `;
+  }
+
   /**
    * Generate Overall Facial Symmetry Score display
    */

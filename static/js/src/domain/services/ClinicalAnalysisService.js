@@ -1,4 +1,6 @@
 // All interfaces now imported from shared types
+import { SunnybrookScoringService } from './SunnybrookScoringService.js';
+
 export class ClinicalAnalysisService {
     constructor() {
         // MediaPipe landmark indices for clinical analysis
@@ -20,6 +22,7 @@ export class ClinicalAnalysisService {
             // Additional mouth landmarks for comprehensive analysis
             MOUTH_OUTLINE: [61, 84, 17, 314, 405, 320, 307, 375, 321, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95, 78, 191, 80, 81, 82]
         };
+        this.sunnybrookService = new SunnybrookScoringService();
     }
     /**
      * Main analysis function for Bell's palsy assessment
@@ -37,13 +40,17 @@ export class ClinicalAnalysisService {
         // Calculate symmetry metrics
         const symmetryMetrics = this.calculateSymmetryMetrics(eyebrowResults, eyeResults, smileResults, snarlResults, lipPuckerResults);
 
+        // Calculate Sunnybrook Score
+        const sunnybrookScore = this.sunnybrookService.calculateScore(movementData, baselineData);
+
         return {
             eyebrow_raise: eyebrowResults,
             eye_close: eyeResults,
             smile: smileResults,
             snarl: snarlResults,
             lip_pucker: lipPuckerResults,
-            symmetryMetrics: symmetryMetrics
+            symmetryMetrics: symmetryMetrics,
+            sunnybrookScore: sunnybrookScore
         };
     }
     /**
