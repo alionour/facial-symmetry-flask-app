@@ -55,7 +55,8 @@ export class SpeechService {
         utterance.rate = 1.0;
         utterance.volume = 1.0;
         utterance.pitch = 1.0;
-        utterance.lang = 'en-US';
+        // Use document language if available, otherwise default to English
+        utterance.lang = document.documentElement.lang || 'en-US';
         utterance.onstart = () => { this.speechInProgress = true; };
         utterance.onend = () => { this.speechInProgress = false; };
         utterance.onerror = () => { this.speechInProgress = false; };
@@ -75,6 +76,15 @@ export class SpeechService {
      * Get ultra-short speech commands for instant delivery
      */
     getShortSpeechInstruction(action, instruction) {
+        // Check current language
+        const currentLang = document.documentElement.lang || 'en';
+
+        // If Arabic, use the translated instruction directly
+        // The controller passes the translated instruction as the second argument
+        if (currentLang.startsWith('ar')) {
+            return instruction || 'الرجاء اتباع التعليمات';
+        }
+
         const quickCommands = {
             // Direct action enum matches - Full sentences for better clarity
             [FacialActions.neutral]: 'Please relax your face and maintain a neutral expression',
