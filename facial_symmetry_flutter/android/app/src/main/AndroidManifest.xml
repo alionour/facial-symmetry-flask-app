@@ -2,9 +2,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:label="facial_symmetry_flutter"
+        android:label="Face Symmetry"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"

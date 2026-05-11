@@ -11,20 +11,35 @@ This is a Flutter implementation of the Facial Symmetry Analysis tool, designed 
 
 ## Getting Started
 
-1.  **Navigate to project folder**:
-    ```bash
-    cd facial_symmetry_flutter
-    ```
+### Environment Setup
 
-2.  **Install dependencies** (if not done):
-    ```bash
-    flutter pub get
-    ```
+This project uses a custom development environment located on the **F:** drive:
 
-3.  **Run on your device**:
-    ```bash
-    flutter run
-    ```
+- **Flutter SDK**: `F:\Development\flutter`
+- **Android SDK**: `F:\Development\android-sdk`
+
+### Environment Variables
+Ensure the following environment variables are set in your session:
+
+```powershell
+$env:ANDROID_HOME = "F:\Development\android-sdk"
+$env:ANDROID_SDK_ROOT = "F:\Development\android-sdk"
+$env:JAVA_HOME = "C:\Program Files\RedHat\jdk-17.0.12"
+```
+
+### Running the App
+
+I have created shortcut scripts (`run_app.ps1` and `run_app.bat`) that automatically set up the environment for you.
+
+**Using the script:**
+```powershell
+./run_app.bat
+```
+
+**Targeting a specific device:**
+```powershell
+./run_app.bat -d fcc7b4b8
+```
 
 ## Platform Support
 
